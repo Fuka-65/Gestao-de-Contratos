@@ -1,0 +1,150 @@
+@model IReadOnlyList<FaturaGasto>
+@{
+    bool apenasDesvios = ViewBag.ApenasDesvios == true;
+    ViewData["Title"] = apenasDesvios ? "Auditoria de Desvios Financeiros & Glosas" : "Faturas, Medições & Auditoria Contratual";
+    bool podeFinanceiro = User.IsInRole("Master") || User.IsInRole("Financeiro");
+    var contratos = ViewBag.Contratos as IReadOnlyList<Contrato> ?? Array.Empty<Contrato>();
+
+    int totalComDesvio = Model.Count(f => f.PossuiDesvio);
+    decimal somaDesvios = Model.Where(f => f.PossuiDesvio).Sum(f => f.ValorDesvio);
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="kpi-card kpi-primary">
+            <div class="kpi-content">
+                <div class="kpi-label">Total Faturado na Listagem</div>
+                <div class="kpi-value">@Model.Sum(f => f.ValorCobrado).ToString("C2")</div>
+                <div class="kpi-subtext">@Model.Count faturas listadas</div>
+            </div>
+            <div class="kpi-icon-box"><i class="bi bi-receipt"></i></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="kpi-card kpi-secondary">
+            <div class="kpi-content">
+                <div class="kpi-label">Total Homologado em Contrato</div>
+                <div class="kpi-value">@Model.Sum(f => f.ValorContratado).ToString("C2")</div>
+                <div class="kpi-subtext">Base contratual de referência</div>
+            </div>
+            <div class="kpi-icon-box"><i class="bi bi-file-earmark-Lock2"></i></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="kpi-card kpi-danger">
+            <div class="kpi-content">
+                <div class="kpi-label">Excedente / Desvio Detectado</div>
+                <div class="kpi-value" style="color: var(--color-terracotta-red);">@somaDesvios.ToString("C2")</div>
+                <div class="kpi-subtext">@totalComDesvio fatura(s) com cobrança acima do contrato</div>
+            </div>
+            <div class="kpi-icon-box"><i class="bi bi-shield-exclamation"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="corp-card">
+    <div class="corp-card-header flex-wrap gap-2">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <a href="@Url.Action("Index", new { apenasDesvios = false })"
+               class="btn btn-sm @(!apenasDesvios ? "btn-teal" : "btn-outline-secondary")">
+                Todas as Faturas
+            </a>
+            <a href="@Url.Action("Index", new { apenasDesvios = true })"
+               class="btn btn-sm @(apenasDesvios ? "btn-danger" : "btn-outline-danger")">
+                <i class="bi bi-exclamation-octagon me-1"></i>Apenas com Desvio (@totalComDesvio)
+            </a>
+        </div>
+
+        @if (podeFinanceiro)
+        {
+            <a href="@Url.Action("Upsert")" class="btn btn-sm btn-teal px-3">
+                <i class="bi bi-plus-lg me-1"></i>Lançar &amp; Auditar Fatura
+            </a>
+        }
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-corp mb-0">
+            <thead>
+                <tr>
+                    <th>Nota Fiscal</th>
+                    <th>Comp.</th>
+                    <th>Contrato &amp; Fornecedor</th>
+                    <th>Vencimento</th>
+                    <th class="text-end">Valor Contratado</th>
+                    <th class="text-end">Valor Cobrado</th>
+                    <th>Resultado Auditoria</th>
+                    <th>Status</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var f in Model)
+                {
+                    <tr class="@(f.PossuiDesvio ? "table-danger bg-opacity-10" : "")">
+                        <td class="fw-bold">@f.NumeroNotaFiscal</td>
+                        <td><span class="badge bg-light text-dark border">@f.CompetenciaFormatada</span></td>
+                        <td title="@f.Observacoes">
+                            <a href="@Url.Action("Details", "Contratos", new { id = f.ContratoId })" class="fw-bold text-decoration-none" style="color: var(--color-deep-teal);">
+                                @(f.Contrato?.NumeroContrato ?? $"CTR #{f.ContratoId}")
+                            </a>
+                            <div class="small text-muted text-nowrap-ellipsis" style="max-width: 210px;">@(f.Fornecedor?.NomeFantasia ?? "Fornecedor")</div>
+                        </td>
+                        <td>@f.DataVencimento.ToString("dd/MM/yyyy")</td>
+                        <td class="text-end">@f.ValorContratado.ToString("C2")</td>
+                        <td class="text-end fw-bold @(f.PossuiDesvio ? "text-danger" : "")">@f.ValorCobrado.ToString("C2")</td>
+                        <td>
+                            @if (f.PossuiDesvio)
+                            {
+                                <span class="badge badge-terracotta">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Desvio +@f.ValorDesvio.ToString("C2") (+@f.PorcentagemDesvio.ToString("N2")%)
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                                    <i class="bi bi-check-circle-fill me-1"></i>100% Homologado
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            @if (f.Status == StatusFatura.EmDisputaContestada)
+                            {
+                                <span class="badge badge-terracotta">Em Disputa / Glosa</span>
+                            }
+                            else if (f.Status == StatusFatura.Paga)
+                            {
+                                <span class="badge badge-teal">Liquidada</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-amber">@f.Status.ObterNomeExibicao()</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            @if (podeFinanceiro)
+                            {
+                                <div class="btn-group btn-group-sm">
+                                    <a href="@Url.Action("Upsert", new { id = f.Id })" class="btn btn-outline-primary" title="Auditar / Editar Fatura">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    @if (f.Status != StatusFatura.Paga)
+                                    {
+                                        <form asp-action="AtualizarStatus" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@f.Id" />
+                                            <input type="hidden" name="novoStatus" value="@StatusFatura.Paga" />
+                                            <button type="submit" class="btn btn-outline-success" title="Aprovar e Liquidar Pagamento">
+                                                <i class="bi bi-check2-all"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

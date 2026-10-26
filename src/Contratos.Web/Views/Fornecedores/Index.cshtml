@@ -1,0 +1,93 @@
+@model IReadOnlyList<Fornecedor>
+@{
+    ViewData["Title"] = "Fornecedores & Prestadores Homologados";
+    bool podeEditar = User.IsInRole("Master") || User.IsInRole("Financeiro") || User.IsInRole("GestorContratos");
+}
+
+<div class="corp-card mb-4">
+    <div class="corp-card-header flex-wrap">
+        <form method="get" class="d-flex gap-2 flex-grow-1" style="max-width: 480px;">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                <input type="text" name="busca" value="@ViewBag.Busca" class="form-control" placeholder="Buscar por Razão Social, Nome Fantasia ou CNPJ..." />
+                <button type="submit" class="btn btn-outline-secondary">Filtrar</button>
+            </div>
+        </form>
+
+        @if (podeEditar)
+        {
+            <a href="@Url.Action("Upsert", "Fornecedores")" class="btn btn-sm btn-teal px-3">
+                <i class="bi bi-plus-lg me-1"></i>Novo Fornecedor
+            </a>
+        }
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-corp mb-0">
+            <thead>
+                <tr>
+                    <th>Nome Fantasia / Razão Social</th>
+                    <th>CNPJ</th>
+                    <th>Contato Comercial</th>
+                    <th>Contato Financeiro</th>
+                    <th>SLA / Suporte</th>
+                    <th class="text-center">Contratos</th>
+                    <th>Status</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td title="@item.RazaoSocial">
+                            <a href="@Url.Action("Details", new { id = item.Id })" class="fw-bold text-decoration-none" style="color: var(--color-deep-teal);">
+                                @item.NomeFantasia
+                            </a>
+                            <div class="small text-muted text-nowrap-ellipsis" style="max-width: 240px;">@item.RazaoSocial</div>
+                        </td>
+                        <td class="fw-semibold">@item.Cnpj</td>
+                        <td>
+                            <div>@(item.ContatoComercialNome ?? "-")</div>
+                            <div class="small text-muted">@item.ContatoComercialEmail</div>
+                        </td>
+                        <td>
+                            <div>@(item.ContatoFinanceiroNome ?? "-")</div>
+                            <div class="small text-muted">@item.ContatoFinanceiroEmail</div>
+                        </td>
+                        <td title="@item.SlaAtendimento">
+                            <div class="text-nowrap-ellipsis" style="max-width: 190px;">@(item.SlaAtendimento ?? "SLA Padrão")</div>
+                            <div class="small text-muted">@item.CentralSuporte</div>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-teal">@item.Contratos.Count</span>
+                        </td>
+                        <td>
+                            @if (item.Ativo)
+                            {
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Homologado</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inativo</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="@Url.Action("Details", new { id = item.Id })" class="btn btn-outline-secondary" title="Detalhes">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                @if (podeEditar)
+                                {
+                                    <a href="@Url.Action("Upsert", new { id = item.Id })" class="btn btn-outline-primary" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

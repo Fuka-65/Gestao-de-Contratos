@@ -1,0 +1,85 @@
+@model Fornecedor
+@{
+    ViewData["Title"] = $"Ficha do Fornecedor: {Model.NomeFantasia}";
+    bool podeEditar = User.IsInRole("Master") || User.IsInRole("Financeiro") || User.IsInRole("GestorContratos");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <span class="badge badge-teal mb-1">CNPJ: @Model.Cnpj</span>
+        <h4 class="fw-bold mb-0" style="color: var(--color-deep-teal);">@Model.RazaoSocial</h4>
+    </div>
+    <div class="d-flex gap-2">
+        @if (podeEditar)
+        {
+            <a href="@Url.Action("Upsert", new { id = Model.Id })" class="btn btn-sm btn-teal">
+                <i class="bi bi-pencil me-1"></i>Editar Fornecedor
+            </a>
+        }
+        <a href="@Url.Action("Index")" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="corp-card p-3 h-100">
+            <h6 class="fw-bold border-bottom pb-2" style="color: var(--color-deep-teal);">Dados Cadastrais &amp; SLA</h6>
+            <div class="small d-flex flex-column gap-2">
+                <div><strong>Nome Fantasia:</strong> @Model.NomeFantasia</div>
+                <div><strong>Inscrição Estadual:</strong> @(Model.InscricaoEstadual ?? "-") | <strong>IM:</strong> @(Model.InscricaoMunicipal ?? "-")</div>
+                <div><strong>Central de Suporte:</strong> @(Model.CentralSuporte ?? "-")</div>
+                <div><strong>SLA Contratual:</strong> @(Model.SlaAtendimento ?? "-")</div>
+                <div><strong>Observações:</strong> @(Model.Observacoes ?? "-")</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="corp-card p-3 h-100">
+            <h6 class="fw-bold border-bottom pb-2" style="color: var(--color-deep-teal);">Canais de Relacionamento</h6>
+            <div class="small d-flex flex-column gap-2">
+                <div><strong>Comercial:</strong> @(Model.ContatoComercialNome ?? "-") (@Model.ContatoComercialTelefone | @Model.ContatoComercialEmail)</div>
+                <div><strong>Financeiro / Faturamento:</strong> @(Model.ContatoFinanceiroNome ?? "-") (@Model.ContatoFinanceiroTelefone | @Model.ContatoFinanceiroEmail)</div>
+                <div><strong>Website:</strong> <a href="@Model.Site" target="_blank">@Model.Site</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="corp-card">
+    <div class="corp-card-header">
+        <h2 class="corp-card-title">Contratos Vinculados a este Fornecedor (@Model.Contratos.Count)</h2>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-corp mb-0">
+            <thead>
+                <tr>
+                    <th>Nº Contrato</th>
+                    <th>Objeto</th>
+                    <th>Categoria</th>
+                    <th>Vigência</th>
+                    <th class="text-end">Valor Mensal</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model.Contratos)
+                {
+                    <tr>
+                        <td>
+                            <a href="@Url.Action("Details", "Contratos", new { id = c.Id })" class="fw-bold text-decoration-none" style="color: var(--color-deep-teal);">
+                                @c.NumeroContrato
+                            </a>
+                        </td>
+                        <td>@c.TituloObjeto</td>
+                        <td>@c.CategoriaContrato.ObterNomeExibicao()</td>
+                        <td>@c.DataInicioVigencia.ToString("dd/MM/yyyy") a @c.DataTerminoVigencia.ToString("dd/MM/yyyy")</td>
+                        <td class="text-end fw-bold">@c.ValorMensalContratado.ToString("C2")</td>
+                        <td><span class="badge badge-teal">@c.Status.ObterNomeExibicao()</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

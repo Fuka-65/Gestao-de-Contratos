@@ -1,0 +1,159 @@
+@model IReadOnlyList<RateioDepartamento>
+@{
+    ViewData["Title"] = "Rateio de Custos por Departamento & Centro de Custos";
+    var resumo = ViewBag.ResumoDepartamentos as IReadOnlyList<RateioResumoDepartamentoViewModel> ?? Array.Empty<RateioResumoDepartamentoViewModel>();
+    decimal totalCorporativo = ViewBag.TotalCorporativoAlocado ?? 0m;
+    var contratos = ViewBag.Contratos as IReadOnlyList<Contrato> ?? Array.Empty<Contrato>();
+    bool podeFinanceiro = User.IsInRole("Master") || User.IsInRole("Financeiro");
+}
+
+<div class="row g-4 mb-4">
+    <!-- Tabela Resumo Consolidada por Centro de Custos -->
+    <div class="col-12 col-xl-7">
+        <div class="corp-card h-100">
+            <div class="corp-card-header">
+                <h2 class="corp-card-title">
+                    <i class="bi bi-building-gear me-2"></i>Consolidação Mensal por Departamento e Centro de Custos
+                </h2>
+                <span class="badge badge-teal">Total Alocado: @totalCorporativo.ToString("C2")</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-corp mb-0">
+                    <thead>
+                        <tr>
+                            <th>Departamento</th>
+                            <th>Centro de Custo</th>
+                            <th class="text-center">Contratos</th>
+                            <th class="text-end">Custo Mensal Alocado</th>
+                            <th class="text-end">% Corporativo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in resumo)
+                        {
+                            <tr>
+                                <td class="fw-bold">@item.Departamento</td>
+                                <td><code>@item.CentroDeCusto</code></td>
+                                <td class="text-center"><span class="badge bg-light text-dark border">@item.QuantidadeContratos</span></td>
+                                <td class="text-end fw-bold" style="color: var(--color-deep-teal);">@item.CustoMensalAlocado.ToString("C2")</td>
+                                <td class="text-end">
+                                    <span class="badge badge-teal">@item.PercentualSobreTotalCorporativo.ToString("N2")%</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulário de Nova Regra de Rateio -->
+    <div class="col-12 col-xl-5">
+        <div class="corp-card h-100">
+            <div class="corp-card-header">
+                <h2 class="corp-card-title">
+                    <i class="bi bi-plus-square me-2"></i>Vincular Rateio a Contrato
+                </h2>
+            </div>
+            <div class="p-3">
+                @if (podeFinanceiro)
+                {
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Contrato *</label>
+                            <select name="ContratoId" class="form-select form-select-sm" required>
+                                @foreach (var c in contratos)
+                                {
+                                    <option value="@c.Id">@c.NumeroContrato - @c.TituloObjeto (@c.ValorMensalContratado.ToString("C2"))</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-7">
+                                <label class="form-label small fw-semibold">Departamento *</label>
+                                <input type="text" name="Departamento" class="form-control form-control-sm" placeholder="Ex: Engenharia de Dados" required />
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label small fw-semibold">Centro de Custo *</label>
+                                <input type="text" name="CentroDeCusto" class="form-control form-control-sm" placeholder="Ex: CC-1040-DATA" required />
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Percentual (%) *</label>
+                                <input type="number" step="0.01" min="0.01" max="100" name="Percentual" class="form-control form-control-sm" placeholder="Ex: 50.00" required />
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label small fw-semibold">Justificativa / Critério</label>
+                                <input type="text" name="Observacao" class="form-control form-control-sm" placeholder="Rateio proporcional por headcount/licenças" />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-teal w-100">
+                            <i class="bi bi-check2-circle me-1"></i>Salvar Regra de Rateio
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <div class="alert alert-light border small mb-0">
+                        Visualização em modo leitura. Apenas perfis <strong>Master</strong> ou <strong>Financeiro</strong> podem alterar matrizes de rateio contábil.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detalhamento Completo de Regras de Rateio por Contrato -->
+<div class="corp-card">
+    <div class="corp-card-header">
+        <h2 class="corp-card-title">Matriz Analítica de Rateios Contratuais (@Model.Count alocações ativas)</h2>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-corp mb-0">
+            <thead>
+                <tr>
+                    <th>Contrato</th>
+                    <th>Departamento</th>
+                    <th>Centro de Custo</th>
+                    <th class="text-end">% Alocado</th>
+                    <th class="text-end">Quota Mensal (R$)</th>
+                    <th>Critério / Observação</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model)
+                {
+                    var valorContrato = r.Contrato?.ValorMensalContratado ?? 0m;
+                    var quota = Math.Round(valorContrato * (r.Percentual / 100m), 2);
+                    <tr>
+                        <td>
+                            <a href="@Url.Action("Details", "Contratos", new { id = r.ContratoId })" class="fw-bold text-decoration-none" style="color: var(--color-deep-teal);">
+                                @(r.Contrato?.NumeroContrato ?? $"CTR #{r.ContratoId}")
+                            </a>
+                        </td>
+                        <td class="fw-semibold">@r.Departamento</td>
+                        <td><code>@r.CentroDeCusto</code></td>
+                        <td class="text-end fw-bold">@r.Percentual.ToString("N2")%</td>
+                        <td class="text-end fw-semibold">@quota.ToString("C2")</td>
+                        <td class="text-muted small">@(r.Observacao ?? "-")</td>
+                        <td class="text-end">
+                            @if (podeFinanceiro)
+                            {
+                                <form asp-action="Delete" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@r.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Remover Rateio">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,147 @@
+@model Contrato
+@{
+    bool ehNovo = Model.Id == 0;
+    ViewData["Title"] = ehNovo ? "Formalizar Novo Contrato Corporativo" : $"Editar Contrato: {Model.NumeroContrato}";
+    var fornecedores = ViewBag.Fornecedores as IReadOnlyList<Fornecedor> ?? Array.Empty<Fornecedor>();
+}
+
+<div class="corp-card mx-auto" style="max-width: 1020px;">
+    <div class="corp-card-header">
+        <h2 class="corp-card-title">
+            <i class="bi bi-journal-plus me-2"></i>@ViewData["Title"]
+        </h2>
+        <a href="@Url.Action("Index")" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Voltar
+        </a>
+    </div>
+
+    <div class="p-4">
+        <form asp-action="Upsert" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ArquivoContratoPath" />
+
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label asp-for="NumeroContrato" class="form-label small fw-semibold text-uppercase">Nº do Contrato *</label>
+                    <input asp-for="NumeroContrato" class="form-control" required />
+                    <span asp-validation-for="NumeroContrato" class="text-danger small"></span>
+                </div>
+                <div class="col-md-5">
+                    <label asp-for="FornecedorId" class="form-label small fw-semibold text-uppercase">Fornecedor Contratado *</label>
+                    <select asp-for="FornecedorId" class="form-select" required>
+                        @foreach (var f in fornecedores)
+                        {
+                            <option value="@f.Id">@f.NomeFantasia (@f.Cnpj)</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="CategoriaContrato" class="form-label small fw-semibold text-uppercase">Categoria Contratual *</label>
+                    <select asp-for="CategoriaContrato" class="form-select" asp-items="Html.GetEnumSelectList<CategoriaContrato>()"></select>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="TituloObjeto" class="form-label small fw-semibold text-uppercase">Título / Objeto Detalhado do Escopo *</label>
+                    <input asp-for="TituloObjeto" class="form-control" required />
+                    <span asp-validation-for="TituloObjeto" class="text-danger small"></span>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <h6 class="fw-bold border-bottom pb-2" style="color: var(--color-deep-teal);">
+                        <i class="bi bi-calendar-range me-1"></i>Prazos de Vigência, Valores &amp; Prevenção de Renovação Involuntária
+                    </h6>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="DataAssinatura" class="form-label small fw-semibold">Data de Assinatura</label>
+                    <input asp-for="DataAssinatura" type="date" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="DataInicioVigencia" class="form-label small fw-semibold">Início da Vigência *</label>
+                    <input asp-for="DataInicioVigencia" type="date" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="DataTerminoVigencia" class="form-label small fw-semibold">Término da Vigência *</label>
+                    <input asp-for="DataTerminoVigencia" type="date" class="form-control" required />
+                    <span asp-validation-for="DataTerminoVigencia" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="ValorMensalContratado" class="form-label small fw-semibold">Valor Mensal Homologado (R$) *</label>
+                    <input asp-for="ValorMensalContratado" type="number" step="0.01" class="form-control fw-bold" required />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="ValorGlobalContrato" class="form-label small fw-semibold">Valor Global Estimado (R$)</label>
+                    <input asp-for="ValorGlobalContrato" type="number" step="0.01" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="IndiceReajuste" class="form-label small fw-semibold">Índice Oficial de Reajuste</label>
+                    <select asp-for="IndiceReajuste" class="form-select" asp-items="Html.GetEnumSelectList<IndiceReajuste>()"></select>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="DiasAvisoPrevioRescisao" class="form-label small fw-semibold">Aviso Prévio p/ Não Renovação (Dias)</label>
+                    <input asp-for="DiasAvisoPrevioRescisao" type="number" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="DiasAlertaVencimento" class="form-label small fw-semibold">Margem de Alerta Visual (Dias)</label>
+                    <input asp-for="DiasAlertaVencimento" type="number" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Status" class="form-label small fw-semibold">Status do Contrato</label>
+                    <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<StatusContrato>()"></select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end pb-2">
+                    <div class="form-check form-switch">
+                        <input asp-for="RenovaAutomaticamente" class="form-check-input" type="checkbox" />
+                        <label asp-for="RenovaAutomaticamente" class="form-check-label fw-semibold">Renovação Automática</label>
+                    </div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <h6 class="fw-bold border-bottom pb-2" style="color: var(--color-deep-teal);">
+                        <i class="bi bi-diagram-2 me-1"></i>Governança Interna, Centro de Custos &amp; Repositório Digital PDF
+                    </h6>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="CentroDeCusto" class="form-label small fw-semibold">Centro de Custo Principal *</label>
+                    <input asp-for="CentroDeCusto" class="form-control" placeholder="Ex: CC-1020-TI" required />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="DepartamentoResponsavel" class="form-label small fw-semibold">Departamento Responsável *</label>
+                    <input asp-for="DepartamentoResponsavel" class="form-control" required />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="GestorContratoNome" class="form-label small fw-semibold">Gestor do Contrato *</label>
+                    <input asp-for="GestorContratoNome" class="form-control" required />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="GestorContratoEmail" class="form-label small fw-semibold">E-mail do Gestor *</label>
+                    <input asp-for="GestorContratoEmail" type="email" class="form-control" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Upload do Instrumento Contratual (PDF Digitalizado)</label>
+                    <input type="file" name="arquivoPdf" accept=".pdf" class="form-control" />
+                    @if (!string.IsNullOrWhiteSpace(Model.ArquivoContratoPath))
+                    {
+                        <div class="small text-muted mt-1">Arquivo atual: <code>@Model.ArquivoContratoPath</code></div>
+                    }
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Observacoes" class="form-label small fw-semibold">Cláusulas Críticas / Observações</label>
+                    <textarea asp-for="Observacoes" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-teal px-4">
+                    <i class="bi bi-check2-circle me-1"></i>Salvar Contrato
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,238 @@
+@model Contrato
+@{
+    ViewData["Title"] = $"Dossiê do Contrato: {Model.NumeroContrato}";
+    bool podeEditar = User.IsInRole("Master") || User.IsInRole("Financeiro") || User.IsInRole("GestorContratos");
+    bool podeFinanceiro = User.IsInRole("Master") || User.IsInRole("Financeiro");
+    int dias = Model.DiasRestantes();
+}
+
+<!-- Cabeçalho do Dossiê Contratual -->
+<div class="corp-card p-3 p-lg-4 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge badge-teal">@Model.NumeroContrato</span>
+                <span class="badge bg-light text-dark border">@Model.CategoriaContrato.ObterNomeExibicao()</span>
+                @if (Model.EstaVencido())
+                {
+                    <span class="badge badge-terracotta">Vencido há @Math.Abs(dias) dias</span>
+                }
+                else if (Model.EstaProximoVencimento())
+                {
+                    <span class="badge badge-amber">Vence em @dias dias</span>
+                }
+                else
+                {
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success">Vigente (@dias dias restantes)</span>
+                }
+            </div>
+            <h4 class="fw-bold mb-1" style="color: var(--color-deep-teal);">@Model.TituloObjeto</h4>
+            <div class="text-secondary small">
+                <strong>Fornecedor:</strong> @(Model.Fornecedor?.RazaoSocial ?? "N/D") (CNPJ: @Model.Fornecedor?.Cnpj)
+                &bull; <strong>Gestor:</strong> @Model.GestorContratoNome (@Model.GestorContratoEmail)
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            @if (!string.IsNullOrWhiteSpace(Model.ArquivoContratoPath))
+            {
+                <a href="@Model.ArquivoContratoPath" target="_blank" class="btn btn-sm btn-outline-dark">
+                    <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i>Abrir PDF do Contrato
+                </a>
+            }
+            @if (podeFinanceiro)
+            {
+                <a href="@Url.Action("Upsert", "Faturas", new { contratoId = Model.Id })" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-receipt me-1"></i>Lançar Fatura p/ Auditoria
+                </a>
+            }
+            @if (podeEditar)
+            {
+                <a href="@Url.Action("Upsert", new { id = Model.Id })" class="btn btn-sm btn-teal">
+                    <i class="bi bi-pencil me-1"></i>Editar Contrato
+                </a>
+            }
+        </div>
+    </div>
+
+    <hr class="my-3" />
+
+    <div class="row g-3 small">
+        <div class="col-6 col-md-3">
+            <div class="text-muted text-uppercase fw-semibold">Valor Mensal Homologado</div>
+            <div class="fs-5 fw-bold" style="color: var(--color-deep-teal);">@Model.ValorMensalContratado.ToString("C2")</div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="text-muted text-uppercase fw-semibold">Valor Global</div>
+            <div class="fs-5 fw-bold">@Model.ValorGlobalContrato.ToString("C2")</div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="text-muted text-uppercase fw-semibold">Período de Vigência</div>
+            <div class="fw-semibold">@Model.DataInicioVigencia.ToString("dd/MM/yyyy") até @Model.DataTerminoVigencia.ToString("dd/MM/yyyy")</div>
+            <div class="text-muted">Índice: @Model.IndiceReajuste.ObterNomeExibicao()</div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="text-muted text-uppercase fw-semibold">Cláusula de Renovação</div>
+            <div class="fw-semibold">@(Model.RenovaAutomaticamente ? $"Automática (Aviso Prévio: {Model.DiasAvisoPrevioRescisao} dias)" : "Renovação Manual via Aditivo")</div>
+            <div class="text-muted">Depto: @Model.DepartamentoResponsavel (@Model.CentroDeCusto)</div>
+        </div>
+    </div>
+</div>
+
+<!-- Abas: Termos Aditivos, Rateio de Custos e Histórico de Faturas -->
+<div class="row g-4">
+    <!-- Coluna 1: Termos Aditivos -->
+    <div class="col-12 col-xl-6">
+        <div class="corp-card h-100">
+            <div class="corp-card-header">
+                <h2 class="corp-card-title">
+                    <i class="bi bi-file-earmark-diff me-2"></i>Termos Aditivos &amp; Histórico de Reajustes (@Model.TermosAditivos.Count)
+                </h2>
+            </div>
+            <div class="p-3">
+                @if (podeEditar)
+                {
+                    <form asp-action="AdicionarAditivo" method="post" enctype="multipart/form-data" class="p-3 rounded-3 bg-light border mb-3">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ContratoId" value="@Model.Id" />
+                        <div class="fw-bold small text-uppercase mb-2" style="color: var(--color-deep-teal);">Registrar Novo Termo Aditivo</div>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="text" name="NumeroAditivo" class="form-control form-control-sm" placeholder="Ex: 2º TA - Prorrogação" required />
+                            </div>
+                            <div class="col-md-4">
+                                <select name="TipoAditivo" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<TipoAditivo>()"></select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="date" name="DataAssinatura" value="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control form-control-sm" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small mb-0 text-muted">Nova Data de Término (Opcional)</label>
+                                <input type="date" name="NovaDataTermino" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small mb-0 text-muted">Novo Valor Mensal Homologado (R$)</label>
+                                <input type="number" step="0.01" name="NovoValorMensal" class="form-control form-control-sm" placeholder="Ex: 52000,00" />
+                            </div>
+                            <div class="col-md-8">
+                                <input type="text" name="DescricaoAlteracao" class="form-control form-control-sm" placeholder="Resumo do objeto do termo aditivo..." required />
+                            </div>
+                            <div class="col-md-4 d-grid">
+                                <button type="submit" class="btn btn-sm btn-teal">
+                                    <i class="bi bi-plus-circle me-1"></i>Averbar Aditivo
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                }
+
+                <div class="table-responsive">
+                    <table class="table table-sm table-corp mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nº Aditivo</th>
+                                <th>Tipo</th>
+                                <th>Assinatura</th>
+                                <th>Novo Término</th>
+                                <th class="text-end">Novo Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.TermosAditivos.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-3">Nenhum termo aditivo averbado neste contrato.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var ta in Model.TermosAditivos)
+                                {
+                                    <tr>
+                                        <td class="fw-bold" title="@ta.DescricaoAlteracao">@ta.NumeroAditivo</td>
+                                        <td>@ta.TipoAditivo.ObterNomeExibicao()</td>
+                                        <td>@ta.DataAssinatura.ToString("dd/MM/yyyy")</td>
+                                        <td>@(ta.NovaDataTermino?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                        <td class="text-end fw-semibold">@(ta.NovoValorMensal?.ToString("C2") ?? "-")</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coluna 2: Rateio por Departamento e Centro de Custo -->
+    <div class="col-12 col-xl-6">
+        <div class="corp-card h-100">
+            <div class="corp-card-header">
+                <h2 class="corp-card-title">
+                    <i class="bi bi-pie-chart me-2"></i>Rateio de Custos por Departamento (@Model.Rateios.Sum(r => r.Percentual).ToString("N0")%)
+                </h2>
+            </div>
+            <div class="p-3">
+                @if (podeEditar)
+                {
+                    <form asp-action="AdicionarRateio" method="post" class="p-3 rounded-3 bg-light border mb-3">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ContratoId" value="@Model.Id" />
+                        <div class="fw-bold small text-uppercase mb-2" style="color: var(--color-deep-teal);">Adicionar Alocação de Centro de Custos</div>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="text" name="Departamento" class="form-control form-control-sm" placeholder="Departamento" required />
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="CentroDeCusto" class="form-control form-control-sm" placeholder="CC-0000" required />
+                            </div>
+                            <div class="col-md-2">
+                                <input type="number" step="0.01" name="Percentual" class="form-control form-control-sm" placeholder="%" required />
+                            </div>
+                            <div class="col-md-3 d-grid">
+                                <button type="submit" class="btn btn-sm btn-teal">Alocar %</button>
+                            </div>
+                        </div>
+                    </form>
+                }
+
+                <div class="table-responsive">
+                    <table class="table table-sm table-corp mb-0">
+                        <thead>
+                            <tr>
+                                <th>Departamento</th>
+                                <th>Centro de Custo</th>
+                                <th class="text-end">% Rateio</th>
+                                <th class="text-end">Custo Mensal</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in Model.Rateios)
+                            {
+                                var valorQuota = Math.Round(Model.ValorMensalContratado * (r.Percentual / 100m), 2);
+                                <tr>
+                                    <td class="fw-semibold">@r.Departamento</td>
+                                    <td><code>@r.CentroDeCusto</code></td>
+                                    <td class="text-end fw-bold">@r.Percentual.ToString("N2")%</td>
+                                    <td class="text-end">@valorQuota.ToString("C2")</td>
+                                    <td class="text-end">
+                                        @if (podeEditar)
+                                        {
+                                            <form asp-action="ExcluirRateio" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@r.Id" />
+                                                <input type="hidden" name="contratoId" value="@Model.Id" />
+                                                <button type="submit" class="btn btn-sm text-danger p-0"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

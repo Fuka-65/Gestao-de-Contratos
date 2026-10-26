@@ -1,0 +1,293 @@
+@inject IClmRepository ClmRepo
+@{
+    var config = await ClmRepo.ObterConfiguracaoAsync();
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
+
+    var fullName = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Usuário";
+    var userInitial = !string.IsNullOrWhiteSpace(fullName) ? fullName.Trim()[0].ToString().ToUpperInvariant() : "U";
+    var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? User.Identity?.Name ?? "";
+    var userDepartment = User.FindFirst("Department")?.Value ?? "Corporativo";
+    var mostPermissiveRole = User.FindFirst("MostPermissiveRole")?.Value ?? "Colaborador";
+    var allRolesDisplay = User.FindFirst("AllRolesDisplay")?.Value ?? mostPermissiveRole;
+
+    bool isMaster = User.IsInRole(nameof(UserRole.Master));
+    bool isFinanceiro = isMaster || User.IsInRole(nameof(UserRole.Financeiro));
+    bool isGestor = isFinanceiro || User.IsInRole(nameof(UserRole.GestorContratos));
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - @config.NomeFantasiaEmpresa</title>
+
+    <!-- Script de Inicialização Rápida no <head> para eliminar qualquer flicker da Sidebar -->
+    <script>
+        (function () {
+            try {
+                if (localStorage.getItem("contratos_sidebar_collapsed") === "true") {
+                    document.documentElement.classList.add("sidebar-collapsed");
+                }
+            } catch (e) { }
+        })();
+    </script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @if (config.SplashAtivo && currentController == "Home" && currentAction == "Index")
+    {
+        <div id="corporateSplash" class="corporate-splash-overlay" style="display: none;">
+            <div class="text-center px-4" style="max-width: 620px;">
+                <div class="mb-3 d-inline-flex align-items-center justify-content-center rounded-4 p-3" style="background: rgba(0, 120, 137, 0.28); border: 1px solid rgba(255,255,255,0.2);">
+                    @if (!string.IsNullOrWhiteSpace(config.LogoEmpresaPath))
+                    {
+                        <img src="@config.LogoEmpresaPath" alt="Logo" style="max-height: 58px;" />
+                    }
+                    else
+                    {
+                        <i class="bi bi-shield-check text-white" style="font-size: 2.8rem;"></i>
+                    }
+                </div>
+                <div class="text-uppercase small fw-bold mb-1" style="letter-spacing: 2px; color: #7ce2f0;">@config.RazaoSocialEmpresa</div>
+                <h2 class="fw-bold mb-2">@config.SplashTitulo</h2>
+                <p class="text-white-50 mb-4">@config.SplashSlogan</p>
+                <div class="spinner-border spinner-border-sm text-light" role="status"></div>
+            </div>
+        </div>
+        <script>
+            (function () {
+                try {
+                    if (!sessionStorage.getItem("contratos_splash_shown")) {
+                        var splash = document.getElementById("corporateSplash");
+                        if (splash) {
+                            splash.style.display = "flex";
+                            sessionStorage.setItem("contratos_splash_shown", "true");
+                            setTimeout(function () {
+                                splash.classList.add("splash-hidden");
+                            }, @(config.SplashTempoSegundos * 1000));
+                        }
+                    }
+                } catch (e) { }
+            })();
+        </script>
+    }
+
+    <div class="app-wrapper">
+        <!-- Menu Lateral Retrátil (Collapsible Sidebar) -->
+        <aside class="app-sidebar" id="appSidebar">
+            <a href="@Url.Action("Index", "Home")" class="sidebar-brand" title="@config.NomeFantasiaEmpresa">
+                <div class="sidebar-brand-icon">
+                    <i class="bi bi-file-earmark-Lock2-fill bi-file-earmark-check-fill"></i>
+                </div>
+                <div class="sidebar-brand-text">
+                    <span class="sidebar-brand-title">@config.NomeFantasiaEmpresa</span>
+                    <span class="sidebar-brand-subtitle">CLM & Auditoria</span>
+                </div>
+            </a>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-section-label">Visão Executiva</div>
+                <a href="@Url.Action("Index", "Home")"
+                   class="sidebar-link @(currentController == "Home" ? "active" : "")"
+                   title="Dashboard Executivo">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard Executivo</span>
+                </a>
+
+                <div class="sidebar-section-label">Ciclo de Vida (CLM)</div>
+                <a href="@Url.Action("Index", "Contratos")"
+                   class="sidebar-link @(currentController == "Contratos" && ViewBag.FiltroAlerta == null ? "active" : "")"
+                   title="Contratos & Aditivos">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Contratos & Aditivos</span>
+                </a>
+
+                <a href="@Url.Action("Index", "Contratos", new { filtroAlerta = "vencendo" })"
+                   class="sidebar-link @(currentController == "Contratos" && ViewBag.FiltroAlerta == "vencendo" ? "active" : "")"
+                   title="Alertas de Vencimento">
+                    <i class="bi bi-alarm"></i>
+                    <span>Alertas de Vigência</span>
+                </a>
+
+                <a href="@Url.Action("Index", "Fornecedores")"
+                   class="sidebar-link @(currentController == "Fornecedores" ? "active" : "")"
+                   title="Fornecedores Homologados">
+                    <i class="bi bi-buildings"></i>
+                    <span>Fornecedores</span>
+                </a>
+
+                <div class="sidebar-section-label">Auditoria Financeira</div>
+                <a href="@Url.Action("Index", "Faturas")"
+                   class="sidebar-link @(currentController == "Faturas" && ViewBag.ApenasDesvios != true ? "active" : "")"
+                   title="Faturas & Medições">
+                    <i class="bi bi-receipt-cutoff"></i>
+                    <span>Faturas & Medições</span>
+                </a>
+
+                <a href="@Url.Action("Index", "Faturas", new { apenasDesvios = true })"
+                   class="sidebar-link @(currentController == "Faturas" && ViewBag.ApenasDesvios == true ? "active" : "")"
+                   title="Auditoria de Desvios">
+                    <i class="bi bi-shield-exclamation"></i>
+                    <span>Auditoria de Desvios</span>
+                </a>
+
+                <a href="@Url.Action("Index", "Rateios")"
+                   class="sidebar-link @(currentController == "Rateios" ? "active" : "")"
+                   title="Rateio por Centro de Custos">
+                    <i class="bi bi-pie-chart"></i>
+                    <span>Rateio & Centros Custo</span>
+                </a>
+
+                @if (isMaster)
+                {
+                    <div class="sidebar-section-label">Governança & Segurança</div>
+                    <a href="@Url.Action("Index", "Admin", new { aba = "usuarios" })"
+                       class="sidebar-link @(currentController == "Admin" && ViewBag.AbaAtiva == "usuarios" ? "active" : "")"
+                       title="Gestão de Usuários e RBAC">
+                        <i class="bi bi-person-fill-gear"></i>
+                        <span>Gestão de Usuários</span>
+                    </a>
+                    <a href="@Url.Action("Index", "Admin", new { aba = "ldap" })"
+                       class="sidebar-link @(currentController == "Admin" && ViewBag.AbaAtiva == "ldap" ? "active" : "")"
+                       title="Active Directory (LDAP)">
+                        <i class="bi bi-diagram-3-fill"></i>
+                        <span>Integração LDAP / AD</span>
+                    </a>
+                    <a href="@Url.Action("Index", "Admin", new { aba = "empresa" })"
+                       class="sidebar-link @(currentController == "Admin" && (ViewBag.AbaAtiva == "empresa" || ViewBag.AbaAtiva == null) ? "active" : "")"
+                       title="Configurações Globais">
+                        <i class="bi bi-sliders"></i>
+                        <span>Parâmetros Globais</span>
+                    </a>
+                }
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="d-flex align-items-center justify-content-between">
+                    <span><i class="bi bi-lock-fill me-1 text-info"></i>AES-256 & RBAC</span>
+                    <span>v8.0 LTS</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Container Principal Expansível (.app-main) -->
+        <div class="app-main" id="appMain">
+            <header class="app-topbar">
+                <div class="d-flex align-items-center gap-3 min-w-0">
+                    <button type="button" id="btnToggleSidebar" class="btn-sidebar-toggle" title="Recolher / Expandir Menu Lateral">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <h1 class="topbar-page-title">@(ViewData["Title"] ?? "Governança de Contratos Corporativos")</h1>
+                </div>
+
+                <!-- Topbar Limpa: Avatar + Nome do Usuário (Papéis detalhados apenas dentro do dropdown) -->
+                <div class="d-flex align-items-center gap-3">
+                    <div class="dropdown">
+                        <a href="#" class="user-profile-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="user-avatar-circle">@userInitial</span>
+                            <span class="d-none d-sm-inline text-nowrap-ellipsis" style="max-width: 180px;">@fullName</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-profile">
+                            <div class="profile-dropdown-header">
+                                <div class="fw-bold">@fullName</div>
+                                <div class="small text-white-50 mb-2">@userEmail</div>
+                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                    <span class="badge bg-info text-dark fw-semibold">
+                                        <i class="bi bi-shield-lock-fill me-1"></i>@mostPermissiveRole
+                                    </span>
+                                </div>
+                                <div class="mt-2 pt-2 border-top border-secondary border-opacity-50 small text-white-50">
+                                    <div><strong>Papéis Acumulados:</strong> @allRolesDisplay</div>
+                                    <div><strong>Depto:</strong> @userDepartment</div>
+                                </div>
+                            </div>
+                            <div class="p-2">
+                                @if (isMaster)
+                                {
+                                    <a class="dropdown-item rounded-2 py-2" href="@Url.Action("Index", "Admin", new { aba = "usuarios" })">
+                                        <i class="bi bi-person-fill-gear me-2 text-secondary"></i>Gestão de Usuários
+                                    </a>
+                                    <a class="dropdown-item rounded-2 py-2" href="@Url.Action("Index", "Admin", new { aba = "empresa" })">
+                                        <i class="bi bi-gear me-2 text-secondary"></i>Configurações Globais
+                                    </a>
+                                    <hr class="dropdown-divider my-1" />
+                                }
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item rounded-2 py-2 text-danger fw-semibold">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Encerrar Sessão
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="p-3 p-lg-4 flex-grow-1">
+                @if (TempData["Sucesso"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-3 d-flex align-items-center" role="alert">
+                        <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+                        <div>@TempData["Sucesso"]</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["AlertaDesvio"] != null)
+                {
+                    <div class="alert alert-dismissible fade show shadow-sm mb-3 d-flex align-items-center"
+                         style="background-color: #fdf2f0; border-left: 5px solid var(--color-terracotta-red); color: var(--color-terracotta-red);" role="alert">
+                        <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
+                        <div class="fw-semibold">@TempData["AlertaDesvio"]</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["Erro"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-3 d-flex align-items-center" role="alert">
+                        <i class="bi bi-x-octagon-fill fs-5 me-2"></i>
+                        <div>@TempData["Erro"]</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+
+            <footer class="px-4 py-3 border-top bg-white text-muted small d-flex flex-wrap justify-content-between align-items-center">
+                <div>
+                    <strong>@config.RazaoSocialEmpresa</strong> &mdash; CNPJ: @config.CnpjEmpresa
+                </div>
+                <div>
+                    Sistema Corporativo de Governança de Contratos (CLM) &amp; Auditoria Financeira &bull; .NET 8 LTS
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function () {
+            var btn = document.getElementById("btnToggleSidebar");
+            if (btn) {
+                btn.addEventListener("click", function () {
+                    var html = document.documentElement;
+                    var isCollapsed = html.classList.toggle("sidebar-collapsed");
+                    try {
+                        localStorage.setItem("contratos_sidebar_collapsed", isCollapsed ? "true" : "false");
+                    } catch (e) { }
+
+                    setTimeout(function () {
+                        window.dispatchEvent(new Event("resize"));
+                    }, 300);
+                });
+            }
+        })();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

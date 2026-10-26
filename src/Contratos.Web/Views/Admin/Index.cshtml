@@ -1,0 +1,478 @@
+@model ConfiguracaoSistema
+@{
+    ViewData["Title"] = "Administração Global, Integração LDAP & Governança RBAC";
+    string abaAtiva = ViewBag.AbaAtiva as string ?? "empresa";
+    var usuarios = ViewBag.Usuarios as IReadOnlyList<Usuario> ?? Array.Empty<Usuario>();
+    var logs = ViewBag.Logs as IReadOnlyList<LogAuditoria> ?? Array.Empty<LogAuditoria>();
+}
+
+<!-- Abas de Navegação do Módulo Administrativo -->
+<ul class="nav nav-pills mb-4 gap-2">
+    <li class="nav-item">
+        <a class="nav-link @(abaAtiva == "empresa" ? "active btn-teal" : "bg-white text-dark border")"
+           href="@Url.Action("Index", new { aba = "empresa" })">
+            <i class="bi bi-sliders me-1"></i>1. Configuração da Empresa &amp; Splash
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(abaAtiva == "ldap" ? "active btn-teal" : "bg-white text-dark border")"
+           href="@Url.Action("Index", new { aba = "ldap" })">
+            <i class="bi bi-diagram-3-fill me-1"></i>2. Active Directory (LDAP)
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(abaAtiva == "usuarios" ? "active btn-teal" : "bg-white text-dark border")"
+           href="@Url.Action("Index", new { aba = "usuarios" })">
+            <i class="bi bi-person-fill-gear me-1"></i>3. Gestão de Usuários &amp; RBAC (@usuarios.Count)
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(abaAtiva == "logs" ? "active btn-teal" : "bg-white text-dark border")"
+           href="@Url.Action("Index", new { aba = "logs" })">
+            <i class="bi bi-journal-code me-1"></i>4. Trilha de Auditoria
+        </a>
+    </li>
+</ul>
+
+@if (abaAtiva == "empresa")
+{
+    <div class="corp-card">
+        <div class="corp-card-header">
+            <h2 class="corp-card-title">
+                <i class="bi bi-building-check me-2"></i>Parâmetros Institucionais, Alertas Globais &amp; Splash Screen
+            </h2>
+        </div>
+        <div class="p-4">
+            <form asp-action="SalvarEmpresa" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label asp-for="RazaoSocialEmpresa" class="form-label small fw-semibold">Razão Social da Organização *</label>
+                        <input asp-for="RazaoSocialEmpresa" class="form-control" required />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="NomeFantasiaEmpresa" class="form-label small fw-semibold">Nome Institucional (Cabeçalho/Sidebar) *</label>
+                        <input asp-for="NomeFantasiaEmpresa" class="form-control" required />
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="CnpjEmpresa" class="form-label small fw-semibold">CNPJ Matriz *</label>
+                        <input asp-for="CnpjEmpresa" class="form-control" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Upload de Logotipo Corporativo (PNG/SVG)</label>
+                        <input type="file" name="logoUpload" accept="image/*" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="MargemGlobalDiasAlertaVencimento" class="form-label small fw-semibold">Margem Global de Dias para Alerta Prévio de Vencimento</label>
+                        <input asp-for="MargemGlobalDiasAlertaVencimento" type="number" min="15" max="180" class="form-control" />
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <h6 class="fw-bold border-bottom pb-2" style="color: var(--color-deep-teal);">
+                            <i class="bi bi-stars me-1"></i>Parametrização da Splash Screen Corporativa
+                        </h6>
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-center">
+                        <div class="form-check form-switch">
+                            <input asp-for="SplashAtivo" class="form-check-input" type="checkbox" />
+                            <label asp-for="SplashAtivo" class="form-check-label fw-semibold">Exibir Splash na Sessão</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="SplashTempoSegundos" class="form-label small fw-semibold">Duração (Segundos)</label>
+                        <input asp-for="SplashTempoSegundos" type="number" min="1" max="15" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="SplashTitulo" class="form-label small fw-semibold">Título Institucional da Splash</label>
+                        <input asp-for="SplashTitulo" class="form-control" />
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="SplashSlogan" class="form-label small fw-semibold">Slogan / Mensagem de Governança</label>
+                        <input asp-for="SplashSlogan" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top text-end">
+                    <button type="submit" class="btn btn-teal px-4">
+                        <i class="bi bi-check2-circle me-1"></i>Salvar Parâmetros da Empresa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+else if (abaAtiva == "ldap")
+{
+    <div class="corp-card">
+        <div class="corp-card-header">
+            <h2 class="corp-card-title">
+                <i class="bi bi-diagram-3-fill me-2"></i>Integração Active Directory (LDAP) &amp; Criptografia AES-256
+            </h2>
+            <form asp-action="SincronizarLdap" method="post" class="m-0">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-arrow-repeat me-1"></i>Sincronizar Colaboradores AD
+                </button>
+            </form>
+        </div>
+        <div class="p-4">
+            <div class="alert alert-info border-0 small d-flex align-items-center mb-4">
+                <i class="bi bi-shield-lock-fill fs-5 me-2"></i>
+                <div>
+                    <strong>Regra de Segurança Ativa:</strong> A senha de leitura LDAP é armazenada exclusivamente com token criptografado <code>{ENC:...}</code> (AES-256 + HMAC-SHA256). O login <code>admin@admin</code> autentica localmente e prevalece sempre sobre o Active Directory.
+                </div>
+            </div>
+
+            <form asp-action="SalvarLdap" method="post" id="formLdap">
+                @Html.AntiForgeryToken()
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <div class="form-check form-switch">
+                            <input asp-for="LdapAtivo" class="form-check-input" type="checkbox" />
+                            <label asp-for="LdapAtivo" class="form-check-label fw-bold">Habilitar Autenticação Integrada com Active Directory (LDAP)</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="LdapDominio" class="form-label small fw-semibold">Domínio Corporativo</label>
+                        <input asp-for="LdapDominio" id="ldapDominio" class="form-control" placeholder="corp.empresa.local" />
+                    </div>
+                    <div class="col-md-5">
+                        <label asp-for="LdapServidor" class="form-label small fw-semibold">Servidor / Host LDAP</label>
+                        <input asp-for="LdapServidor" id="ldapServidor" class="form-control" placeholder="ldap://dc01.corp.empresa.local" />
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="LdapPorta" class="form-label small fw-semibold">Porta LDAP / LDAPS</label>
+                        <input asp-for="LdapPorta" id="ldapPorta" type="number" class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="LdapBaseDn" class="form-label small fw-semibold">Base DN de Pesquisa</label>
+                        <input asp-for="LdapBaseDn" class="form-control" placeholder="DC=corp,DC=empresa,DC=local" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="LdapUsuarioLeitura" class="form-label small fw-semibold">Conta de Serviço (Bind User)</label>
+                        <input asp-for="LdapUsuarioLeitura" id="ldapUsuario" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Nova Senha de Leitura (Será Encriptada AES-256)</label>
+                        <input type="password" name="novaSenhaLdap" class="form-control" placeholder="Deixe em branco para manter o token atual" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label small text-muted mb-1">Token Criptografado Armazenado no Repositório:</label>
+                        <input type="text" class="form-control form-control-sm font-monospace bg-light" value="@Model.LdapSenhaLeituraEncrypted" readonly />
+                    </div>
+                </div>
+
+                <!-- Resultado do Teste de Conectividade LDAP -->
+                <div id="ldapStatusBox" class="mt-3 p-3 rounded-3 border d-none">
+                    <div class="d-flex align-items-center gap-2">
+                        <span id="ldapStatusBadge" class="badge"></span>
+                        <span id="ldapStatusMsg" class="small fw-semibold"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center">
+                    <button type="button" class="btn btn-outline-secondary" onclick="testarConexaoLdap()">
+                        <i class="bi bi-plug-fill me-1"></i>Testar Conectividade LDAP
+                    </button>
+                    <button type="submit" class="btn btn-teal px-4">
+                        <i class="bi bi-check2-circle me-1"></i>Salvar Configuração LDAP
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+else if (abaAtiva == "usuarios")
+{
+    <div class="row g-4">
+        <!-- Lista de Usuários e Papéis Acumulados -->
+        <div class="col-12 col-xl-7">
+            <div class="corp-card h-100">
+                <div class="corp-card-header">
+                    <h2 class="corp-card-title">
+                        <i class="bi bi-person-fill-gear me-2"></i>Usuários Corporativos &amp; Matriz RBAC
+                    </h2>
+                    <span class="badge badge-teal">Regra do Mais Permissivo Ativa</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-corp mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nome / Login</th>
+                                <th>Papéis Acumulados</th>
+                                <th>Papel Prevalente</th>
+                                <th>Status</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var u in usuarios)
+                            {
+                                bool ehImune = u.EhAdminImune();
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold d-flex align-items-center gap-1">
+                                            @u.NomeCompleto
+                                            @if (ehImune)
+                                            {
+                                                <span class="badge bg-dark" title="Imunidade Absoluta e Perpétua">
+                                                    <i class="bi bi-shield-fill-check text-info me-1"></i>IMUNE
+                                                </span>
+                                            }
+                                        </div>
+                                        <div class="small text-muted">@u.Login (@u.Email)</div>
+                                    </td>
+                                    <td>
+                                        @foreach (var p in u.Papeis)
+                                        {
+                                            <span class="badge bg-light text-dark border me-1">@p</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-teal">@u.ObterPapelMaisPermissivo().ObterNomeExibicao()</span>
+                                    </td>
+                                    <td>
+                                        @if (u.Ativo)
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success">Ativo</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inativo</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                                onclick="carregarUsuario(@u.Id, '@u.NomeCompleto', '@u.Email', '@u.Login', '@u.Departamento', '@u.Cargo', '@u.PapeisCsv', @(u.Ativo ? "true" : "false"), @(ehImune ? "true" : "false"))"
+                                                title="Editar / Redefinir Senha">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        @if (!ehImune)
+                                        {
+                                            <form asp-action="ExcluirUsuario" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@u.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir Usuário">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário de Cadastro / Edição de Usuário com Acúmulo de Papéis -->
+        <div class="col-12 col-xl-5">
+            <div class="corp-card h-100">
+                <div class="corp-card-header">
+                    <h2 class="corp-card-title" id="tituloFormUsuario">
+                        <i class="bi bi-person-plus-fill me-2"></i>Cadastrar / Editar Usuário Corporativo
+                    </h2>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="limparFormUsuario()">Novo</button>
+                </div>
+                <div class="p-3">
+                    <form asp-action="SalvarUsuario" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" id="usrId" value="0" />
+
+                        <div id="avisoImunidadeAdmin" class="alert alert-warning small py-2 d-none">
+                            <i class="bi bi-lock-fill me-1"></i>
+                            <strong>Proteção Perpétua admin@admin:</strong> Este usuário não pode ser excluído, desativado ou ter seu papel Master revogado. Apenas a redefinição de senha é permitida.
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Nome Completo *</label>
+                                <input type="text" name="nomeCompleto" id="usrNome" class="form-control form-control-sm" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Login de Acesso *</label>
+                                <input type="text" name="login" id="usrLogin" class="form-control form-control-sm" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">E-mail Corporativo *</label>
+                                <input type="email" name="email" id="usrEmail" class="form-control form-control-sm" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Senha Forte (PBKDF2-SHA256)</label>
+                                <input type="password" name="senha" id="usrSenha" class="form-control form-control-sm" placeholder="Mín. 8 chars (A-z, 0-9, !@@#)" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Departamento</label>
+                                <input type="text" name="departamento" id="usrDepto" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Cargo</label>
+                                <input type="text" name="cargo" id="usrCargo" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+
+                        <div class="p-2 rounded bg-light border mb-3">
+                            <div class="small fw-bold mb-1" style="color: var(--color-deep-teal);">
+                                Acúmulo de Papéis RBAC (O mais permissivo prevalece):
+                            </div>
+                            <div class="row g-1 small">
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input role-chk" type="checkbox" name="papeisSelecionados" value="1" id="chkRole1" />
+                                        <label class="form-check-label fw-semibold" for="chkRole1">1 - Master (Total)</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input role-chk" type="checkbox" name="papeisSelecionados" value="2" id="chkRole2" />
+                                        <label class="form-check-label fw-semibold" for="chkRole2">2 - Financeiro</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input role-chk" type="checkbox" name="papeisSelecionados" value="3" id="chkRole3" checked />
+                                        <label class="form-check-label fw-semibold" for="chkRole3">3 - Gestor Contratos</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input role-chk" type="checkbox" name="papeisSelecionados" value="4" id="chkRole4" />
+                                        <label class="form-check-label fw-semibold" for="chkRole4">4 - Auditor (Leitura)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="ativo" value="true" id="usrAtivo" checked />
+                                <label class="form-check-label small fw-semibold" for="usrAtivo">Conta Ativa</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="autenticacaoAd" value="true" id="usrAd" />
+                                <label class="form-check-label small fw-semibold" for="usrAd">Integrado ao AD</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-sm btn-teal w-100 py-2">
+                            <i class="bi bi-check2-circle me-1"></i>Salvar Usuário &amp; Permissões RBAC
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (abaAtiva == "logs")
+{
+    <div class="corp-card">
+        <div class="corp-card-header">
+            <h2 class="corp-card-title">
+                <i class="bi bi-journal-code me-2"></i>Trilha de Auditoria e Segurança Corporativa
+            </h2>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover table-corp mb-0">
+                <thead>
+                    <tr>
+                        <th>Data / Hora (UTC)</th>
+                        <th>Usuário</th>
+                        <th>Evento</th>
+                        <th>Entidade</th>
+                        <th>Detalhes da Operação</th>
+                        <th>Endereço IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in logs)
+                    {
+                        <tr>
+                            <td>@log.DataHora.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            <td class="fw-bold">@log.UsuarioLogin</td>
+                            <td><span class="badge badge-teal">@log.Acao</span></td>
+                            <td>@log.Entidade</td>
+                            <td title="@log.Detalhes" style="max-width: 440px;">@log.Detalhes</td>
+                            <td><code>@(log.EnderecoIp ?? "127.0.0.1")</code></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function testarConexaoLdap() {
+            var box = document.getElementById('ldapStatusBox');
+            var badge = document.getElementById('ldapStatusBadge');
+            var msg = document.getElementById('ldapStatusMsg');
+            box.classList.remove('d-none');
+            badge.className = 'badge bg-secondary';
+            badge.innerText = 'TESTANDO...';
+            msg.innerText = 'Verificando conectividade com o controlador de domínio LDAP...';
+
+            var formData = new FormData(document.getElementById('formLdap'));
+            fetch('@Url.Action("TestarLdap", "Admin")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.sucesso) {
+                    box.style.backgroundColor = '#f0fdf4';
+                    box.style.borderColor = '#198754';
+                    badge.className = 'badge bg-success';
+                    badge.innerText = 'ONLINE (' + data.latenciaMs + 'ms)';
+                    msg.innerText = data.mensagem;
+                } else {
+                    box.style.backgroundColor = '#fdf2f0';
+                    box.style.borderColor = '#b6462e';
+                    badge.className = 'badge badge-terracotta';
+                    badge.innerText = 'OFFLINE (' + data.latenciaMs + 'ms)';
+                    msg.innerText = data.mensagem;
+                }
+            });
+        }
+
+        function carregarUsuario(id, nome, email, login, depto, cargo, papeisCsv, ativo, ehImune) {
+            document.getElementById('usrId').value = id;
+            document.getElementById('usrNome').value = nome;
+            document.getElementById('usrEmail').value = email;
+            document.getElementById('usrLogin').value = login;
+            document.getElementById('usrDepto').value = depto || '';
+            document.getElementById('usrCargo').value = cargo || '';
+            document.getElementById('usrAtivo').checked = ativo;
+
+            var roles = (papeisCsv || '').split(',');
+            document.querySelectorAll('.role-chk').forEach(chk => {
+                chk.checked = roles.includes(chk.value);
+            });
+
+            var aviso = document.getElementById('avisoImunidadeAdmin');
+            if (ehImune) {
+                aviso.classList.remove('d-none');
+            } else {
+                aviso.classList.add('d-none');
+            }
+        }
+
+        function limparFormUsuario() {
+            document.getElementById('usrId').value = '0';
+            document.getElementById('usrNome').value = '';
+            document.getElementById('usrEmail').value = '';
+            document.getElementById('usrLogin').value = '';
+            document.getElementById('usrDepto').value = '';
+            document.getElementById('usrCargo').value = '';
+            document.getElementById('usrSenha').value = '';
+            document.getElementById('usrAtivo').checked = true;
+            document.getElementById('avisoImunidadeAdmin').classList.add('d-none');
+        }
+    </script>
+}

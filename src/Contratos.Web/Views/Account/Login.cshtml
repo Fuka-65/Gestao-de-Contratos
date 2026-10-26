@@ -1,0 +1,136 @@
+@{
+    Layout = null;
+    var config = ViewBag.Config as ConfiguracaoSistema ?? new ConfiguracaoSistema();
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acesso Corporativo - @config.NomeFantasiaEmpresa</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="d-flex align-items-center justify-content-center min-vh-100"
+      style="background: linear-gradient(135deg, #004d5d 0%, #002933 55%, #191919 100%);">
+
+    <div class="container" style="max-width: 960px;">
+        <div class="row g-0 rounded-4 overflow-hidden shadow-lg border border-light border-opacity-10">
+            <!-- Painel Institucional Esquerdo -->
+            <div class="col-lg-6 p-4 p-lg-5 d-flex flex-column justify-content-between text-white"
+                 style="background: linear-gradient(160deg, rgba(0,120,137,0.35) 0%, rgba(0,77,93,0.85) 100%);">
+                <div>
+                    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill small fw-semibold mb-4"
+                         style="background: rgba(255,255,255,0.14);">
+                        <i class="bi bi-shield-check text-info"></i>
+                        <span>Governança CLM &amp; Auditoria Financeira</span>
+                    </div>
+                    <h2 class="fw-bold mb-3">@config.NomeFantasiaEmpresa</h2>
+                    <p class="text-white-50 mb-4">@config.SplashSlogan</p>
+
+                    <div class="d-flex flex-column gap-3 small">
+                        <div class="d-flex align-items-start gap-3">
+                            <i class="bi bi-calendar2-check fs-5 text-info"></i>
+                            <div>
+                                <div class="fw-bold">Prevenção de Renovações Involuntárias</div>
+                                <div class="text-white-50">Monitoramento proativo de vigências, avisos prévios e termos aditivos.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-3">
+                            <i class="bi bi-cash-coin fs-5 text-warning"></i>
+                            <div>
+                                <div class="fw-bold">Auditoria Automática de Faturas</div>
+                                <div class="text-white-50">Confronto imediato entre o valor faturado pelo fornecedor e o contrato vigente.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-3">
+                            <i class="bi bi-key-fill fs-5 text-info"></i>
+                            <div>
+                                <div class="fw-bold">Segurança RBAC &amp; Criptografia AES-256</div>
+                                <div class="text-white-50">Controle de acesso por papel prevalente e integração Active Directory.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top border-light border-opacity-10 small text-white-50">
+                    @config.RazaoSocialEmpresa &bull; CNPJ @config.CnpjEmpresa
+                </div>
+            </div>
+
+            <!-- Painel de Autenticação Direito -->
+            <div class="col-lg-6 bg-white p-4 p-lg-5">
+                <div class="mb-4">
+                    <h4 class="fw-bold mb-1" style="color: var(--color-deep-teal);">Autenticação Corporativa</h4>
+                    <p class="text-muted small mb-0">Informe suas credenciais locais ou de rede (Active Directory).</p>
+                </div>
+
+                @if (TempData["ErroLogin"] != null)
+                {
+                    <div class="alert alert-danger py-2 small d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <span>@TempData["ErroLogin"]</span>
+                    </div>
+                }
+
+                <form asp-controller="Account" asp-action="Login" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-uppercase text-secondary">Usuário ou E-mail</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-person-badge"></i></span>
+                            <input type="text" name="login" id="inputLogin" class="form-control" value="admin@admin" required autofocus />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small text-uppercase text-secondary">Senha de Acesso</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                            <input type="password" name="senha" id="inputSenha" class="form-control" value="Admin@Contratos2026!" required />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-teal w-100 py-2 mb-3 shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Acessar Plataforma CLM
+                    </button>
+                </form>
+
+                <div class="p-3 rounded-3 bg-light border small">
+                    <div class="fw-bold text-secondary mb-2">
+                        <i class="bi bi-info-circle me-1"></i>Credenciais Homologadas (Preenchimento Rápido):
+                    </div>
+                    <div class="d-flex flex-wrap gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                onclick="preencher('admin@admin','Admin@Contratos2026!')">
+                            Master (admin@admin)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                onclick="preencher('fernanda.ribeiro','Financeiro@2026!')">
+                            Financeiro + Gestor
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                onclick="preencher('carlos.mendes','Gestor@2026!')">
+                            Gestor Contratos
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                onclick="preencher('marcelo.rocha','Auditor@2026!')">
+                            Auditor (Leitura)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function preencher(u, s) {
+            document.getElementById('inputLogin').value = u;
+            document.getElementById('inputSenha').value = s;
+        }
+    </script>
+</body>
+</html>

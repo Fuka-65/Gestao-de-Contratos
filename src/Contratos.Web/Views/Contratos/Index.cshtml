@@ -1,0 +1,129 @@
+@model IReadOnlyList<Contrato>
+@{
+    ViewData["Title"] = "Repositório & Ciclo de Vida de Contratos (CLM)";
+    bool podeEditar = User.IsInRole("Master") || User.IsInRole("Financeiro") || User.IsInRole("GestorContratos");
+    var hoje = DateTime.Today;
+}
+
+<div class="corp-card mb-4">
+    <div class="corp-card-header flex-wrap gap-2">
+        <form method="get" class="row g-2 align-items-center flex-grow-1">
+            <div class="col-12 col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                    <input type="text" name="busca" value="@ViewBag.Busca" class="form-control" placeholder="Nº Contrato, Objeto, Fornecedor ou Gestor..." />
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="categoria" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<CategoriaContrato>()">
+                    <option value="">Todas as Categorias</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <select name="filtroAlerta" class="form-select form-select-sm">
+                    <option value="">Todos os Prazos</option>
+                    <option value="vencendo" selected="@(ViewBag.FiltroAlerta == "vencendo")">Próximos do Vencimento</option>
+                    <option value="vencidos" selected="@(ViewBag.FiltroAlerta == "vencidos")">Vencidos / Expirados</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-3 d-flex gap-1">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Filtrar</button>
+                <a href="@Url.Action("Index")" class="btn btn-sm btn-link text-decoration-none text-secondary">Limpar</a>
+            </div>
+        </form>
+
+        @if (podeEditar)
+        {
+            <a href="@Url.Action("Upsert")" class="btn btn-sm btn-teal px-3">
+                <i class="bi bi-plus-lg me-1"></i>Novo Contrato
+            </a>
+        }
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-corp mb-0">
+            <thead>
+                <tr>
+                    <th>Nº Contrato</th>
+                    <th>Objeto &amp; Fornecedor</th>
+                    <th>Categoria / Índice</th>
+                    <th>Término Vigência</th>
+                    <th>Prazo Restante</th>
+                    <th>Renovação Auto</th>
+                    <th class="text-end">Valor Mensal</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    int dias = c.DiasRestantes(hoje);
+                    bool vencido = c.EstaVencido(hoje);
+                    bool proximo = c.EstaProximoVencimento(hoje);
+
+                    <tr>
+                        <td>
+                            <a href="@Url.Action("Details", new { id = c.Id })" class="fw-bold text-decoration-none" style="color: var(--color-deep-teal);">
+                                @c.NumeroContrato
+                            </a>
+                            <div class="small text-muted">@c.CentroDeCusto</div>
+                        </td>
+                        <td title="@c.TituloObjeto">
+                            <div class="fw-semibold text-nowrap-ellipsis" style="max-width: 240px;">@(c.Fornecedor?.NomeFantasia ?? "Fornecedor")</div>
+                            <div class="small text-muted text-nowrap-ellipsis" style="max-width: 240px;">@c.TituloObjeto</div>
+                        </td>
+                        <td>
+                            <div>@c.CategoriaContrato.ObterNomeExibicao()</div>
+                            <div class="small text-muted">Reajuste: @c.IndiceReajuste.ObterNomeExibicao()</div>
+                        </td>
+                        <td>@c.DataTerminoVigencia.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            @if (vencido)
+                            {
+                                <span class="badge badge-terracotta">
+                                    <i class="bi bi-x-circle-fill me-1"></i>Vencido (@Math.Abs(dias)d)
+                                </span>
+                            }
+                            else if (proximo)
+                            {
+                                <span class="badge badge-amber">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>@dias dias
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-teal">@dias dias</span>
+                            }
+                        </td>
+                        <td>
+                            @if (c.RenovaAutomaticamente)
+                            {
+                                <span class="badge bg-warning bg-opacity-25 text-dark border border-warning">
+                                    Sim (Aviso @(c.DiasAvisoPrevioRescisao)d)
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-secondary border">Não</span>
+                            }
+                        </td>
+                        <td class="text-end fw-bold">@c.ValorMensalContratado.ToString("C2")</td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="@Url.Action("Details", new { id = c.Id })" class="btn btn-outline-secondary" title="Governança, Aditivos e Rateio">
+                                    <i class="bi bi-folder2-open"></i>
+                                </a>
+                                @if (podeEditar)
+                                {
+                                    <a href="@Url.Action("Upsert", new { id = c.Id })" class="btn btn-outline-primary" title="Editar Contrato">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,140 @@
+@model FaturaGasto
+@{
+    bool ehNova = Model.Id == 0;
+    ViewData["Title"] = ehNova ? "Lançar Fatura & Executar Auditoria Automática" : $"Auditar Fatura: {Model.NumeroNotaFiscal}";
+    var contratos = ViewBag.Contratos as IReadOnlyList<Contrato> ?? Array.Empty<Contrato>();
+}
+
+<div class="corp-card mx-auto" style="max-width: 900px;">
+    <div class="corp-card-header">
+        <h2 class="corp-card-title">
+            <i class="bi bi-receipt-cutoff me-2"></i>@ViewData["Title"]
+        </h2>
+        <a href="@Url.Action("Index")" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Voltar
+        </a>
+    </div>
+
+    <div class="p-4">
+        <form asp-action="Upsert" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label asp-for="ContratoId" class="form-label small fw-semibold text-uppercase">Contrato Vinculado *</label>
+                    <select asp-for="ContratoId" id="selectContrato" class="form-select" required onchange="atualizarValorReferencia()">
+                        @foreach (var c in contratos)
+                        {
+                            <option value="@c.Id" data-valor="@c.ValorMensalContratado.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)">
+                                @c.NumeroContrato - @(c.Fornecedor?.NomeFantasia) (Mensal Homologado: @c.ValorMensalContratado.ToString("C2"))
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="NumeroNotaFiscal" class="form-label small fw-semibold text-uppercase">Nº da Nota Fiscal / Fatura *</label>
+                    <input asp-for="NumeroNotaFiscal" class="form-control" required />
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="MesReferencia" class="form-label small fw-semibold">Mês Competência *</label>
+                    <input asp-for="MesReferencia" type="number" min="1" max="12" class="form-control" required />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="AnoReferencia" class="form-label small fw-semibold">Ano Competência *</label>
+                    <input asp-for="AnoReferencia" type="number" min="2020" max="2035" class="form-control" required />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="DataVencimento" class="form-label small fw-semibold">Data de Vencimento *</label>
+                    <input asp-for="DataVencimento" type="date" class="form-control" required />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Status" class="form-label small fw-semibold">Status da Fatura</label>
+                    <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<StatusFatura>()"></select>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <div class="p-3 rounded-3 border" style="background-color: #f8fbfc;">
+                        <h6 class="fw-bold mb-3" style="color: var(--color-deep-teal);">
+                            <i class="bi bi-calculator me-1"></i>Confronto Financeiro Automático (Contrato vs. Fatura Apresentada)
+                        </h6>
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-4">
+                                <label asp-for="ValorContratado" class="form-label small fw-semibold">Valor Mensal Homologado (R$)</label>
+                                <input asp-for="ValorContratado" id="inputContratado" type="number" step="0.01" class="form-control bg-light" oninput="simularAuditoria()" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="ValorCobrado" class="form-label small fw-semibold">Valor Cobrado na Fatura (R$) *</label>
+                                <input asp-for="ValorCobrado" id="inputCobrado" type="number" step="0.01" class="form-control fw-bold" oninput="simularAuditoria()" required />
+                            </div>
+                            <div class="col-md-4">
+                                <div id="boxResultadoAuditoria" class="p-2 rounded-2 text-center border">
+                                    <div class="small text-muted">Status de Conformidade</div>
+                                    <div id="lblResultadoAuditoria" class="fw-bold">Aguardando conferência</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="CodigoBarrasLinhaDigitavel" class="form-label small fw-semibold">Linha Digitável do Boleto</label>
+                    <input asp-for="CodigoBarrasLinhaDigitavel" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Anexar PDF da Nota Fiscal / Boleto</label>
+                    <input type="file" name="arquivoFaturaPdf" accept=".pdf" class="form-control" />
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Observacoes" class="form-label small fw-semibold">Parecer da Auditoria / Justificativa de Glosa ou Desvio</label>
+                    <textarea asp-for="Observacoes" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-teal px-4">
+                    <i class="bi bi-shield-check me-1"></i>Executar Auditoria &amp; Salvar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function atualizarValorReferencia() {
+            var sel = document.getElementById('selectContrato');
+            var opt = sel.options[sel.selectedIndex];
+            if (opt && opt.dataset.valor) {
+                document.getElementById('inputContratado').value = opt.dataset.valor;
+                simularAuditoria();
+            }
+        }
+
+        function simularAuditoria() {
+            var contratado = parseFloat(document.getElementById('inputContratado').value) || 0;
+            var cobrado = parseFloat(document.getElementById('inputCobrado').value) || 0;
+            var box = document.getElementById('boxResultadoAuditoria');
+            var lbl = document.getElementById('lblResultadoAuditoria');
+
+            if (cobrado > contratado && contratado > 0) {
+                var desvio = cobrado - contratado;
+                var pct = ((desvio / contratado) * 100).toFixed(2);
+                box.style.backgroundColor = '#fdf2f0';
+                box.style.borderColor = '#b6462e';
+                lbl.style.color = '#b6462e';
+                lbl.innerText = 'DESVIO: +R$ ' + desvio.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + ' (+' + pct + '%)';
+            } else {
+                box.style.backgroundColor = '#f0fdf4';
+                box.style.borderColor = '#198754';
+                lbl.style.color = '#198754';
+                lbl.innerText = 'CONFORME AO CONTRATO';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', simularAuditoria);
+    </script>
+}

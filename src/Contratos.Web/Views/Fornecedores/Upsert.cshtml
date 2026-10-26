@@ -1,0 +1,114 @@
+@model Fornecedor
+@{
+    bool ehNovo = Model.Id == 0;
+    ViewData["Title"] = ehNovo ? "Cadastrar Fornecedor Corporativo" : $"Editar Fornecedor: {Model.NomeFantasia}";
+}
+
+<div class="corp-card mx-auto" style="max-width: 960px;">
+    <div class="corp-card-header">
+        <h2 class="corp-card-title">
+            <i class="bi bi-buildings me-2"></i>@ViewData["Title"]
+        </h2>
+        <a href="@Url.Action("Index")" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Voltar
+        </a>
+    </div>
+
+    <div class="p-4">
+        <form asp-action="Upsert" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="RazaoSocial" class="form-label fw-semibold small text-uppercase">Razão Social *</label>
+                    <input asp-for="RazaoSocial" class="form-control" required />
+                    <span asp-validation-for="RazaoSocial" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="NomeFantasia" class="form-label fw-semibold small text-uppercase">Nome Fantasia *</label>
+                    <input asp-for="NomeFantasia" class="form-control" required />
+                    <span asp-validation-for="NomeFantasia" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Cnpj" class="form-label fw-semibold small text-uppercase">CNPJ (Com Validação Módulo 11) *</label>
+                    <input asp-for="Cnpj" class="form-control" placeholder="00.000.000/0001-00" required />
+                    <span asp-validation-for="Cnpj" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="InscricaoEstadual" class="form-label fw-semibold small text-uppercase">Inscrição Estadual</label>
+                    <input asp-for="InscricaoEstadual" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="InscricaoMunicipal" class="form-label fw-semibold small text-uppercase">Inscrição Municipal</label>
+                    <input asp-for="InscricaoMunicipal" class="form-control" />
+                </div>
+
+                <div class="col-12 mt-4">
+                    <h6 class="fw-bold border-bottom pb-2" style="color: var(--color-deep-teal);">
+                        <i class="bi bi-person-lines-fill me-1"></i>Governança de Contatos (Comercial &amp; Faturamento)
+                    </h6>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="ContatoComercialNome" class="form-label small fw-semibold">Executivo Comercial</label>
+                    <input asp-for="ContatoComercialNome" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="ContatoComercialTelefone" class="form-label small fw-semibold">Telefone Comercial</label>
+                    <input asp-for="ContatoComercialTelefone" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="ContatoComercialEmail" class="form-label small fw-semibold">E-mail Comercial</label>
+                    <input asp-for="ContatoComercialEmail" class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="ContatoFinanceiroNome" class="form-label small fw-semibold">Responsável Financeiro / Billing</label>
+                    <input asp-for="ContatoFinanceiroNome" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="ContatoFinanceiroTelefone" class="form-label small fw-semibold">Telefone Financeiro</label>
+                    <input asp-for="ContatoFinanceiroTelefone" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="ContatoFinanceiroEmail" class="form-label small fw-semibold">E-mail de Faturamento / Glosas</label>
+                    <input asp-for="ContatoFinanceiroEmail" class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="CentralSuporte" class="form-label small fw-semibold">Canal / Central de Suporte</label>
+                    <input asp-for="CentralSuporte" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="SlaAtendimento" class="form-label small fw-semibold">Acordo de Nível de Serviço (SLA)</label>
+                    <input asp-for="SlaAtendimento" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Site" class="form-label small fw-semibold">Site Institucional</label>
+                    <input asp-for="Site" class="form-control" />
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Observacoes" class="form-label small fw-semibold">Observações de Homologação e Compliance</label>
+                    <textarea asp-for="Observacoes" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="col-12">
+                    <div class="form-check form-switch">
+                        <input asp-for="Ativo" class="form-check-input" type="checkbox" />
+                        <label asp-for="Ativo" class="form-check-label fw-semibold">Fornecedor Ativo e Homologado para Contratação</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-teal px-4">
+                    <i class="bi bi-check2-circle me-1"></i>Salvar Fornecedor
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

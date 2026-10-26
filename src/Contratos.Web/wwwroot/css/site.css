@@ -1,0 +1,505 @@
+/* ==========================================================================
+   IDENTIDADE VISUAL INSTITUCIONAL - GESTÃO DE CONTRATOS (CLM) & AUDITORIA
+   Paleta Pantone Oficial e Diretrizes Corporativas
+   ========================================================================== */
+
+:root {
+    --color-deep-teal: #004d5d;        /* Pantone 3035 C - Cor Primária */
+    --color-vibrant-teal: #007889;     /* Pantone 3145 C - Cor Secundária */
+    --color-warm-amber: #f69f3a;       /* Pantone 2011 C - Alerta / Atenção */
+    --color-terracotta-red: #b6462e;   /* Pantone 6049 C - Crítico / Desvio */
+    --color-dark-charcoal: #191919;    /* Pantone Black 6 C - Menus e Tipografia */
+    --color-medium-gray: #606060;      /* Pantone 8402 C - Textos Secundários */
+    --color-cool-gray: #a2a7a7;        /* Pantone Cool Gray 6 C - Bordas */
+    --color-bg-body: #e8e7e5;          /* Pantone 9345 C - Soft Off-White */
+    --color-surface-white: #ffffff;    /* Surface White */
+
+    --sidebar-width-expanded: 260px;
+    --sidebar-width-collapsed: 68px;
+    --topbar-height: 64px;
+    --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-bg-body);
+    color: var(--color-dark-charcoal);
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 0.925rem;
+    overflow-x: hidden;
+}
+
+/* ==========================================================================
+   LAYOUT SHELL & MENU LATERAL RETRÁTIL (COLLAPSIBLE SIDEBAR)
+   ========================================================================== */
+
+.app-wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width-expanded);
+    background: linear-gradient(180deg, var(--color-deep-teal) 0%, #003542 55%, var(--color-dark-charcoal) 100%);
+    color: #ffffff;
+    z-index: 1040;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.28s var(--transition-smooth);
+    box-shadow: 4px 0 18px rgba(0, 0, 0, 0.14);
+    overflow-x: hidden;
+}
+
+.app-main {
+    margin-left: var(--sidebar-width-expanded);
+    width: calc(100% - var(--sidebar-width-expanded));
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.28s var(--transition-smooth), width 0.28s var(--transition-smooth);
+}
+
+/* Estado Recolhido (Aplicado em html.sidebar-collapsed para zero flicker) */
+html.sidebar-collapsed .app-sidebar {
+    width: var(--sidebar-width-collapsed);
+}
+
+html.sidebar-collapsed .app-main {
+    margin-left: var(--sidebar-width-collapsed);
+    width: calc(100% - var(--sidebar-width-collapsed));
+}
+
+/* Cabeçalho da Sidebar */
+.sidebar-brand {
+    height: var(--topbar-height);
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-decoration: none;
+    color: #ffffff !important;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sidebar-brand-icon {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 8px;
+    background: var(--color-vibrant-teal);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.sidebar-brand-text {
+    margin-left: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sidebar-brand-title {
+    font-weight: 700;
+    font-size: 0.98rem;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+}
+
+.sidebar-brand-subtitle {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+/* Navegação da Sidebar */
+.sidebar-nav {
+    flex: 1;
+    padding: 14px 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sidebar-section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 12px 12px 6px;
+    white-space: nowrap;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    margin-bottom: 4px;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.82);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    transition: all 0.18s ease;
+}
+
+.sidebar-link i {
+    font-size: 1.15rem;
+    min-width: 22px;
+    text-align: center;
+    transition: font-size 0.2s ease;
+}
+
+.sidebar-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.sidebar-link.active {
+    background: linear-gradient(90deg, var(--color-vibrant-teal) 0%, #0092a6 100%);
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 3px 10px rgba(0, 120, 137, 0.4);
+}
+
+.sidebar-footer {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.6);
+    white-space: nowrap;
+}
+
+/* Regras obrigatórias no modo recolhido */
+html.sidebar-collapsed .sidebar-brand {
+    justify-content: center;
+    padding: 0;
+}
+
+html.sidebar-collapsed .sidebar-brand-text,
+html.sidebar-collapsed .sidebar-section-label,
+html.sidebar-collapsed .sidebar-link span,
+html.sidebar-collapsed .sidebar-footer {
+    display: none !important;
+}
+
+html.sidebar-collapsed .sidebar-nav {
+    padding: 14px 8px;
+}
+
+html.sidebar-collapsed .sidebar-link {
+    justify-content: center;
+    padding: 11px 0;
+}
+
+html.sidebar-collapsed .sidebar-link i {
+    font-size: 1.3rem;
+    margin: 0;
+}
+
+/* ==========================================================================
+   TOPBAR LIMPA & PERFIL DO USUÁRIO
+   ========================================================================== */
+
+.app-topbar {
+    height: var(--topbar-height);
+    background-color: var(--color-surface-white);
+    border-bottom: 1px solid rgba(162, 167, 167, 0.45);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.btn-sidebar-toggle {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid rgba(162, 167, 167, 0.5);
+    background: var(--color-surface-white);
+    color: var(--color-deep-teal);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.btn-sidebar-toggle:hover {
+    background-color: var(--color-deep-teal);
+    color: #ffffff;
+    border-color: var(--color-deep-teal);
+}
+
+.topbar-page-title {
+    font-size: 1.08rem;
+    font-weight: 700;
+    color: var(--color-deep-teal);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Botão de Perfil Limpo (Sem Badges no botão externo) */
+.user-profile-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 12px 5px 6px;
+    border-radius: 50px;
+    border: 1px solid rgba(162, 167, 167, 0.45);
+    background-color: #ffffff;
+    color: var(--color-dark-charcoal);
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-decoration: none;
+    transition: all 0.18s ease;
+}
+
+.user-profile-btn:hover {
+    border-color: var(--color-vibrant-teal);
+    background-color: #f8fbfc;
+}
+
+.user-avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-deep-teal), var(--color-vibrant-teal));
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-transform: uppercase;
+}
+
+.dropdown-menu-profile {
+    min-width: 270px;
+    border: 1px solid rgba(162, 167, 167, 0.45);
+    border-radius: 12px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+    padding: 0;
+    overflow: hidden;
+}
+
+.profile-dropdown-header {
+    background: linear-gradient(135deg, var(--color-deep-teal), #003845);
+    color: #ffffff;
+    padding: 16px;
+}
+
+/* ==========================================================================
+   CARDS DE KPI & TIPOGRAFIA SEM QUEBRA DE LINHA
+   ========================================================================== */
+
+.kpi-card {
+    background-color: var(--color-surface-white);
+    border-radius: 10px;
+    padding: 15px 16px;
+    border: 1px solid rgba(162, 167, 167, 0.35);
+    border-left-width: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    overflow: hidden;
+}
+
+.kpi-card.kpi-primary { border-left-color: var(--color-deep-teal); }
+.kpi-card.kpi-secondary { border-left-color: var(--color-vibrant-teal); }
+.kpi-card.kpi-warning { border-left-color: var(--color-warm-amber); }
+.kpi-card.kpi-danger { border-left-color: var(--color-terracotta-red); }
+
+.kpi-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.kpi-label {
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-medium-gray);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.kpi-value {
+    font-size: clamp(1.15rem, 1.35vw, 1.45rem);
+    font-weight: 800;
+    color: var(--color-dark-charcoal);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.kpi-subtext {
+    font-size: 0.76rem;
+    color: var(--color-medium-gray);
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.kpi-icon-box {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+.kpi-primary .kpi-icon-box { background-color: rgba(0, 77, 93, 0.1); color: var(--color-deep-teal); }
+.kpi-secondary .kpi-icon-box { background-color: rgba(0, 120, 137, 0.12); color: var(--color-vibrant-teal); }
+.kpi-warning .kpi-icon-box { background-color: rgba(246, 159, 58, 0.16); color: #d47a10; }
+.kpi-danger .kpi-icon-box { background-color: rgba(182, 70, 46, 0.14); color: var(--color-terracotta-red); }
+
+/* ==========================================================================
+   CARDS CORPORATIVOS, TABELAS E BOTÕES
+   ========================================================================== */
+
+.corp-card {
+    background-color: var(--color-surface-white);
+    border-radius: 10px;
+    border: 1px solid rgba(162, 167, 167, 0.38);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.035);
+    overflow: hidden;
+}
+
+.corp-card-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(162, 167, 167, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background-color: #ffffff;
+}
+
+.corp-card-title {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: var(--color-deep-teal);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table-corp th {
+    background-color: #f4f5f5;
+    color: var(--color-deep-teal);
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 2px solid rgba(162, 167, 167, 0.45);
+    white-space: nowrap;
+    padding: 11px 14px;
+}
+
+.table-corp td {
+    padding: 11px 14px;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 280px;
+}
+
+.text-nowrap-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-teal {
+    background: linear-gradient(135deg, var(--color-vibrant-teal), var(--color-deep-teal));
+    color: #ffffff !important;
+    border: none;
+    font-weight: 600;
+}
+
+.btn-teal:hover {
+    background: linear-gradient(135deg, var(--color-deep-teal), #003642);
+    color: #ffffff !important;
+}
+
+.badge-amber {
+    background-color: rgba(246, 159, 58, 0.18);
+    color: #9e5804;
+    border: 1px solid rgba(246, 159, 58, 0.5);
+    font-weight: 600;
+}
+
+.badge-terracotta {
+    background-color: rgba(182, 70, 46, 0.14);
+    color: var(--color-terracotta-red);
+    border: 1px solid rgba(182, 70, 46, 0.4);
+    font-weight: 600;
+}
+
+.badge-teal {
+    background-color: rgba(0, 120, 137, 0.14);
+    color: var(--color-deep-teal);
+    border: 1px solid rgba(0, 120, 137, 0.35);
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   SPLASH SCREEN CORPORATIVA OPCIONAL
+   ========================================================================== */
+
+.corporate-splash-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, var(--color-deep-teal) 0%, #002b36 60%, var(--color-dark-charcoal) 100%);
+    color: #ffffff;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+.corporate-splash-overlay.splash-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
