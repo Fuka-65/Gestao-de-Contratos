@@ -1,0 +1,292 @@
+@model ResultadoImportacaoFornecedoresViewModel
+@{
+    ViewData["Title"] = "Importação em Lote de Fornecedores (.CSV) & Controle de Duplicidade";
+    bool possuiCarga = Model.TotalLinhasProcessadas > 0;
+}
+
+<!-- Cabeçalho & Upload do Arquivo CSV -->
+<div class="corp-card p-4 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3 pb-3 border-bottom">
+        <div>
+            <h5 class="fw-bold mb-1" style="color: var(--color-deep-teal);">
+                <i class="bi bi-cloud-arrow-up-fill me-2"></i>Importação em Lote de Cadastro de Fornecedores (.CSV)
+            </h5>
+            <p class="text-secondary small mb-0">
+                O sistema valida automaticamente os dígitos verificadores do CNPJ (Módulo 11), bloqueia duplicidades no mesmo arquivo e compara cada campo com a base atual.
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="@Url.Action("BaixarModeloCsv", "Fornecedores")" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i>Baixar Planilha Modelo (.CSV)
+            </a>
+            <a href="@Url.Action("ExportarCsv", "Fornecedores")" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-download me-1"></i>Exportar Base Atual (.CSV)
+            </a>
+            <a href="@Url.Action("Index", "Fornecedores")" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Voltar à Lista
+            </a>
+        </div>
+    </div>
+
+    <form asp-action="Importar" method="post" enctype="multipart/form-data" class="row g-3 align-items-end">
+        @Html.AntiForgeryToken()
+        <div class="col-12 col-md-8">
+            <label class="form-label small fw-semibold text-uppercase">Selecione o arquivo .CSV de Fornecedores (UTF-8 / Delimitador ';' ou ',')</label>
+            <input type="file" name="arquivoCsv" accept=".csv" class="form-control" required />
+        </div>
+        <div class="col-12 col-md-4 d-grid">
+            <button type="submit" class="btn btn-teal py-2">
+                <i class="bi bi-play-circle-fill me-1"></i>Processar Carga &amp; Verificar Duplicidades
+            </button>
+        </div>
+    </form>
+</div>
+
+@if (possuiCarga)
+{
+    <!-- 1. Painel de KPIs de Status da Carga em Tela -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-2">
+            <div class="kpi-card kpi-primary">
+                <div class="kpi-content">
+                    <div class="kpi-label">Linhas Lidas</div>
+                    <div class="kpi-value">@Model.TotalLinhasProcessadas</div>
+                    <div class="kpi-subtext" title="@Model.NomeArquivo">@Model.NomeArquivo</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-2">
+            <div class="kpi-card kpi-secondary">
+                <div class="kpi-content">
+                    <div class="kpi-label">Novos Inseridos</div>
+                    <div class="kpi-value" style="color: var(--color-vibrant-teal);">@Model.TotalNovosInseridos</div>
+                    <div class="kpi-subtext">Cadastrados na base</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-2">
+            <div class="kpi-card kpi-primary">
+                <div class="kpi-content">
+                    <div class="kpi-label">Atualizados</div>
+                    <div class="kpi-value" style="color: var(--color-deep-teal);">@Model.TotalAtualizadosConfirmados</div>
+                    <div class="kpi-subtext">Após confirmação</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-2">
+            <div class="kpi-card kpi-secondary">
+                <div class="kpi-content">
+                    <div class="kpi-label">Mantidos</div>
+                    <div class="kpi-value">@(Model.TotalDuplicadosIdenticos + Model.TotalMantidosConfirmados)</div>
+                    <div class="kpi-subtext">@Model.TotalDuplicadosIdenticos idênticos / @Model.TotalMantidosConfirmados conf.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-2">
+            <div class="kpi-card kpi-warning">
+                <div class="kpi-content">
+                    <div class="kpi-label">Divergências</div>
+                    <div class="kpi-value" style="color: #9a5706;">@Model.TotalConflitosPendentes</div>
+                    <div class="kpi-subtext">Aguardando decisão</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-2">
+            <div class="kpi-card kpi-danger">
+                <div class="kpi-content">
+                    <div class="kpi-label">Erros / Ignorados</div>
+                    <div class="kpi-value" style="color: var(--color-terracotta-red);">@(Model.TotalErrosValidacao + Model.TotalDuplicadosNoArquivo)</div>
+                    <div class="kpi-subtext">@Model.TotalErrosValidacao inválidos / @Model.TotalDuplicadosNoArquivo rep.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Painel de Confirmação de Divergências Cadastrais (Quando há CNPJs já existentes com campos alterados) -->
+    @if (Model.PossuiConflitosPendentes)
+    {
+        <div class="corp-card mb-4" style="border: 2px solid var(--color-warm-amber);">
+            <div class="corp-card-header flex-wrap" style="background-color: rgba(246, 159, 58, 0.14);">
+                <div>
+                    <h2 class="corp-card-title" style="color: #8a4c00;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Confirmação Obrigatória: Cadastros Repetidos com Divergência de Campos (@Model.TotalConflitosPendentes)
+                    </h2>
+                    <div class="small text-secondary mt-1">
+                        Os fornecedores abaixo já existem na base com o mesmo CNPJ, porém possuem campos divergentes no arquivo CSV. Escolha se deseja <strong>Atualizar</strong> ou <strong>Manter o Registro Já Salvo</strong>.
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="marcarTodosConflitos('Atualizar')">
+                        <i class="bi bi-arrow-repeat me-1"></i>Marcar Todos p/ Atualizar
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="marcarTodosConflitos('Manter')">
+                        <i class="bi bi-shield-lock me-1"></i>Marcar Todos p/ Manter Salvo
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-3 p-lg-4">
+                <form asp-action="ResolverDivergencias" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="nomeArquivo" value="@Model.NomeArquivo" />
+                    <input type="hidden" name="estadoCargaJson" value="@Model.EstadoCargaJson" />
+
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var conflito in Model.Itens.Where(i => i.Status == StatusLinhaImportacaoFornecedor.ConflitoDivergenciaPendente))
+                        {
+                            <div class="p-3 rounded-3 border bg-white shadow-sm">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pb-2 mb-2 border-bottom">
+                                    <div>
+                                        <span class="badge badge-amber me-2">Linha #@conflito.NumeroLinha</span>
+                                        <strong style="color: var(--color-deep-teal);">CNPJ: @conflito.Cnpj</strong>
+                                        <span class="ms-2 text-secondary">&mdash; @conflito.RazaoSocial</span>
+                                    </div>
+
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input radio-atualizar" type="radio"
+                                                   name="decisoes[@conflito.NumeroLinha]"
+                                                   id="decAtualizar_@conflito.NumeroLinha"
+                                                   value="Atualizar" checked />
+                                            <label class="form-check-label fw-bold" style="color: var(--color-vibrant-teal);" for="decAtualizar_@conflito.NumeroLinha">
+                                                Atualizar com dados do CSV
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input radio-manter" type="radio"
+                                                   name="decisoes[@conflito.NumeroLinha]"
+                                                   id="decManter_@conflito.NumeroLinha"
+                                                   value="Manter" />
+                                            <label class="form-check-label fw-semibold text-secondary" for="decManter_@conflito.NumeroLinha">
+                                                Manter registro já salvo
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered mb-0 small">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 25%;">Campo Divergente</th>
+                                                <th style="width: 37.5%;">Valor Atual Salvo no Sistema</th>
+                                                <th style="width: 37.5%;">Novo Valor Informado no CSV</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var div in conflito.Divergencias)
+                                            {
+                                                <tr>
+                                                    <td class="fw-semibold">@div.NomeCampo</td>
+                                                    <td class="text-secondary">@div.ValorSalvoAtual</td>
+                                                    <td class="fw-bold" style="color: var(--color-vibrant-teal);">@div.NovoValorCsv</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top d-flex justify-content-end">
+                        <button type="submit" class="btn btn-teal px-4 py-2">
+                            <i class="bi bi-check2-all me-1"></i>Confirmar Decisões e Concluir Carga
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+
+    <!-- 3. Tabela Completa de Status da Carga Linha a Linha -->
+    <div class="corp-card">
+        <div class="corp-card-header">
+            <h2 class="corp-card-title">
+                <i class="bi bi-list-check me-2"></i>Relatório Detalhado do Status da Carga (@Model.NomeArquivo)
+            </h2>
+            <span class="badge badge-teal">Processado em @Model.DataProcessamento.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover table-corp mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Linha</th>
+                        <th style="width: 170px;">CNPJ</th>
+                        <th>Nome Fantasia / Razão Social</th>
+                        <th style="width: 240px;">Status do Processamento</th>
+                        <th>Detalhamento / Ação Executada</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Itens)
+                    {
+                        <tr>
+                            <td class="fw-bold text-secondary">#@item.NumeroLinha</td>
+                            <td class="fw-semibold"><code>@item.Cnpj</code></td>
+                            <td>
+                                <div class="fw-semibold">@(string.IsNullOrWhiteSpace(item.NomeFantasia) ? "-" : item.NomeFantasia)</div>
+                                <div class="small text-muted">@(string.IsNullOrWhiteSpace(item.RazaoSocial) ? "-" : item.RazaoSocial)</div>
+                            </td>
+                            <td>
+                                @switch (item.Status)
+                                {
+                                    case StatusLinhaImportacaoFornecedor.NovoInserido:
+                                        <span class="badge badge-teal">
+                                            <i class="bi bi-plus-circle-fill me-1"></i>Novo Inserido
+                                        </span>
+                                        break;
+                                    case StatusLinhaImportacaoFornecedor.AtualizadoAposConfirmacao:
+                                        <span class="badge badge-teal">
+                                            <i class="bi bi-arrow-repeat me-1"></i>Cadastro Atualizado
+                                        </span>
+                                        break;
+                                    case StatusLinhaImportacaoFornecedor.DuplicadoIdenticoMantido:
+                                    case StatusLinhaImportacaoFornecedor.MantidoAposConfirmacao:
+                                        <span class="badge bg-light text-dark border">
+                                            <i class="bi bi-shield-check me-1"></i>Registro Salvo Mantido
+                                        </span>
+                                        break;
+                                    case StatusLinhaImportacaoFornecedor.ConflitoDivergenciaPendente:
+                                        <span class="badge badge-amber">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>Divergência Pendente
+                                        </span>
+                                        break;
+                                    case StatusLinhaImportacaoFornecedor.DuplicadoNoProprioArquivo:
+                                        <span class="badge badge-amber">
+                                            <i class="bi bi-files me-1"></i>Repetido no CSV
+                                        </span>
+                                        break;
+                                    case StatusLinhaImportacaoFornecedor.ErroValidacao:
+                                        <span class="badge badge-terracotta">
+                                            <i class="bi bi-x-octagon-fill me-1"></i>Erro de Validação
+                                        </span>
+                                        break;
+                                }
+                            </td>
+                            <td class="small" style="white-space: normal; max-width: 420px;">@item.MensagemStatus</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function marcarTodosConflitos(decisao) {
+            if (decisao === 'Atualizar') {
+                document.querySelectorAll('.radio-atualizar').forEach(r => r.checked = true);
+            } else {
+                document.querySelectorAll('.radio-manter').forEach(r => r.checked = true);
+            }
+        }
+    </script>
+}
