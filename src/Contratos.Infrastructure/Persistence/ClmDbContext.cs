@@ -44,6 +44,9 @@ public class ClmDbContext : DbContext
             e.HasIndex(x => x.NumeroContrato).IsUnique();
             e.Property(x => x.ValorMensalContratado).HasPrecision(18, 2);
             e.Property(x => x.ValorGlobalContrato).HasPrecision(18, 2);
+            e.Property(x => x.ValorOpexMensal).HasPrecision(18, 2);
+            e.Property(x => x.ValorCapexMensal).HasPrecision(18, 2);
+            e.Property(x => x.AliquotaImpostosPercentual).HasPrecision(5, 2);
 
             e.HasOne(x => x.Fornecedor)
                 .WithMany(f => f.Contratos)
@@ -98,6 +101,8 @@ public class ClmDbContext : DbContext
         {
             e.ToTable("ConfiguracoesSistema");
             e.HasKey(x => x.Id);
+            e.Property(x => x.AliquotaPadraoImpostosPercentual).HasPrecision(5, 2);
+            e.Property(x => x.TaxaInflacaoSimuladaPadrao).HasPrecision(5, 2);
         });
 
         modelBuilder.Entity<LogAuditoria>(e =>

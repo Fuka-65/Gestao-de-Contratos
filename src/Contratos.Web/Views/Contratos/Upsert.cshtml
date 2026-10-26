@@ -68,7 +68,7 @@
                 </div>
 
                 <div class="col-md-4">
-                    <label asp-for="ValorMensalContratado" class="form-label small fw-semibold">Valor Mensal Homologado (R$) *</label>
+                    <label asp-for="ValorMensalContratado" class="form-label small fw-semibold">Valor Mensal Bruto Homologado (R$) *</label>
                     <input asp-for="ValorMensalContratado" type="number" step="0.01" class="form-control fw-bold" required />
                 </div>
                 <div class="col-md-4">
@@ -78,6 +78,19 @@
                 <div class="col-md-4">
                     <label asp-for="IndiceReajuste" class="form-label small fw-semibold">Índice Oficial de Reajuste</label>
                     <select asp-for="IndiceReajuste" class="form-select" asp-items="Html.GetEnumSelectList<IndiceReajuste>()"></select>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="ValorOpexMensal" class="form-label small fw-semibold">Parcela Mensal OPEX (R$ - Opcional)</label>
+                    <input asp-for="ValorOpexMensal" type="number" step="0.01" class="form-control" placeholder="Despesa Operacional" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="ValorCapexMensal" class="form-label small fw-semibold">Parcela Mensal CAPEX (R$ - Opcional)</label>
+                    <input asp-for="ValorCapexMensal" type="number" step="0.01" class="form-control" placeholder="Investimento em Capital" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="AliquotaImpostosPercentual" class="form-label small fw-semibold">Alíquota de Impostos Apurados (%)</label>
+                    <input asp-for="AliquotaImpostosPercentual" type="number" step="0.01" class="form-control" placeholder="Ex: 14,25" />
                 </div>
 
                 <div class="col-md-3">

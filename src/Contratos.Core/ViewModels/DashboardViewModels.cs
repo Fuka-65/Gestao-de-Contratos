@@ -25,6 +25,13 @@ public class DashboardViewModel
     public decimal ValorTotalDesvioMes { get; set; }
     public decimal ValorDesvioAcumuladoGeral { get; set; }
 
+    // Indicadores Contábeis de Impostos Apurados e OPEX / CAPEX (Competência Atual)
+    public decimal TotalImpostosApuradosMes { get; set; }
+    public decimal TotalLiquidoSemImpostosMes { get; set; }
+    public decimal TotalOpexMensalAtivo { get; set; }
+    public decimal TotalCapexMensalAtivo { get; set; }
+    public ModalidadeValorOrcamento ModalidadeOrcamentoPadrao { get; set; } = ModalidadeValorOrcamento.ValorBrutoComImpostos;
+
     // Listas de Acompanhamento Rápido e Alertas
     public List<ContratoAlertaItemViewModel> ContratosAtencaoImediata { get; set; } = new();
     public List<FaturaAuditoriaItemViewModel> FaturasRecentesAuditoria { get; set; } = new();

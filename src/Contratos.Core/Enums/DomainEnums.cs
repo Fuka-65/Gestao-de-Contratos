@@ -112,3 +112,36 @@ public enum StatusFatura
     [Display(Name = "Em Disputa / Contestada")]
     EmDisputaContestada = 4
 }
+
+public enum TipoPeriodoOrcamento
+{
+    [Display(Name = "Mensal (1 Mês)")]
+    Mensal = 1,
+
+    [Display(Name = "Bimestral (2 Meses)")]
+    Bimestral = 2,
+
+    [Display(Name = "Trimestral (3 Meses)")]
+    Trimestral = 3,
+
+    [Display(Name = "Quadrimestral (4 Meses)")]
+    Quadrimestral = 4,
+
+    [Display(Name = "Semestral (6 Meses)")]
+    Semestral = 6,
+
+    [Display(Name = "Anual (12 Meses)")]
+    Anual = 12,
+
+    [Display(Name = "Período Personalizado (N Meses)")]
+    Personalizado = 99
+}
+
+public enum ModalidadeValorOrcamento
+{
+    [Display(Name = "Valor Bruto (Com Impostos Inclusos)")]
+    ValorBrutoComImpostos = 1,
+
+    [Display(Name = "Valor Líquido (Sem Impostos / Deduzido)")]
+    ValorLiquidoSemImpostos = 2
+}

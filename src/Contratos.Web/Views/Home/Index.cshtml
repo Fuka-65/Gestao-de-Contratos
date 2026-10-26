@@ -60,6 +60,41 @@
     </div>
 </div>
 
+<!-- 1.B Faixa Executiva Contábil: Impostos Apurados, Valor Líquido, OPEX & CAPEX Mensal -->
+<div class="corp-card p-3 mb-4" style="border-left: 5px solid var(--color-deep-teal);">
+    <div class="row g-3 align-items-center">
+        <div class="col-6 col-md-3 border-end">
+            <div class="small text-uppercase fw-bold text-secondary">Comprometimento Bruto vs. Líquido</div>
+            <div class="fw-bold fs-6" style="color: var(--color-deep-teal);">
+                Bruto: @Model.ComprometimentoMensalContratado.ToString("C2")
+            </div>
+            <div class="small text-muted">Líquido s/ Impostos: <strong>@Model.TotalLiquidoSemImpostosMes.ToString("C2")</strong></div>
+        </div>
+        <div class="col-6 col-md-3 border-end">
+            <div class="small text-uppercase fw-bold text-secondary">Impostos Apurados (Mês)</div>
+            <div class="fw-bold fs-6 text-danger">
+                <i class="bi bi-bank2 me-1"></i>@Model.TotalImpostosApuradosMes.ToString("C2")
+            </div>
+            <div class="small text-muted">Tributos retidos/incidentes nos contratos</div>
+        </div>
+        <div class="col-6 col-md-3 border-end">
+            <div class="small text-uppercase fw-bold text-secondary">Segregação OPEX vs. CAPEX</div>
+            <div class="fw-bold small" style="color: var(--color-vibrant-teal);">
+                OPEX: @Model.TotalOpexMensalAtivo.ToString("C2")
+            </div>
+            <div class="fw-bold small" style="color: #b86609;">
+                CAPEX: @Model.TotalCapexMensalAtivo.ToString("C2")
+            </div>
+        </div>
+        <div class="col-6 col-md-3 text-md-end">
+            <a href="@Url.Action("Index", "Orcamento")" class="btn btn-sm btn-teal px-3">
+                <i class="bi bi-calculator-fill me-1"></i>Simular Orçamento (1 a N Meses)
+            </a>
+            <div class="small text-muted mt-1">Anual, Semestral, Trimestral, Bimestral</div>
+        </div>
+    </div>
+</div>
+
 <!-- 2. Seção de Alertas Inteligentes -->
 @if (Model.TotalContratosProximoVencimento > 0 || Model.TotalFaturasComDesvioMes > 0 || Model.TotalContratosVencidos > 0)
 {

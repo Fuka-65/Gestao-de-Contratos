@@ -66,7 +66,13 @@ public class HomeController : Controller
 
             TotalFaturasComDesvioMes = faturasComDesvioMes.Count,
             ValorTotalDesvioMes = faturasComDesvioMes.Sum(f => f.ValorDesvio),
-            ValorDesvioAcumuladoGeral = faturas.Where(f => f.PossuiDesvio).Sum(f => f.ValorDesvio)
+            ValorDesvioAcumuladoGeral = faturas.Where(f => f.PossuiDesvio).Sum(f => f.ValorDesvio),
+
+            TotalImpostosApuradosMes = contratosAtivos.Sum(c => c.CalcularImpostosMensais(c.AliquotaImpostosPercentual > 0 ? c.AliquotaImpostosPercentual : config.AliquotaPadraoImpostosPercentual)),
+            TotalLiquidoSemImpostosMes = contratosAtivos.Sum(c => c.CalcularValorLiquidoMensal(c.AliquotaImpostosPercentual > 0 ? c.AliquotaImpostosPercentual : config.AliquotaPadraoImpostosPercentual)),
+            TotalOpexMensalAtivo = contratosAtivos.Sum(c => c.ObterOpexEfetivo()),
+            TotalCapexMensalAtivo = contratosAtivos.Sum(c => c.ObterCapexEfetivo()),
+            ModalidadeOrcamentoPadrao = config.ModalidadeOrcamentoPadrao
         };
 
         // Tabela de Contratos que exigem atenção imediata (Vencidos ou próximos do vencimento)

@@ -121,6 +121,13 @@
                 </a>
 
                 <div class="sidebar-section-label">Auditoria Financeira</div>
+                <a href="@Url.Action("Index", "Orcamento")"
+                   class="sidebar-link @(currentController == "Orcamento" ? "active" : "")"
+                   title="Orçamento & Projeções (OPEX / CAPEX / Impostos)">
+                    <i class="bi bi-calculator-fill"></i>
+                    <span>Orçamento &amp; Projeções</span>
+                </a>
+
                 <a href="@Url.Action("Index", "Faturas")"
                    class="sidebar-link @(currentController == "Faturas" && ViewBag.ApenasDesvios != true ? "active" : "")"
                    title="Faturas & Medições">

@@ -59,12 +59,15 @@
 
     <div class="row g-3 small">
         <div class="col-6 col-md-3">
-            <div class="text-muted text-uppercase fw-semibold">Valor Mensal Homologado</div>
+            <div class="text-muted text-uppercase fw-semibold">Valor Mensal Bruto vs. Líquido</div>
             <div class="fs-5 fw-bold" style="color: var(--color-deep-teal);">@Model.ValorMensalContratado.ToString("C2")</div>
+            <div class="text-muted">Líquido s/ Imp.: <strong>@Model.CalcularValorLiquidoMensal().ToString("C2")</strong> (Imp.: @Model.CalcularImpostosMensais().ToString("C2") / @Model.AliquotaImpostosPercentual.ToString("N2")%)</div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="text-muted text-uppercase fw-semibold">Valor Global</div>
-            <div class="fs-5 fw-bold">@Model.ValorGlobalContrato.ToString("C2")</div>
+            <div class="text-muted text-uppercase fw-semibold">Classificação OPEX / CAPEX</div>
+            <div class="fw-bold" style="color: var(--color-vibrant-teal);">OPEX: @Model.ObterOpexEfetivo().ToString("C2")</div>
+            <div class="fw-bold" style="color: #b86609;">CAPEX: @Model.ObterCapexEfetivo().ToString("C2")</div>
+            <div class="text-muted">Global: @Model.ValorGlobalContrato.ToString("C2")</div>
         </div>
         <div class="col-6 col-md-3">
             <div class="text-muted text-uppercase fw-semibold">Período de Vigência</div>

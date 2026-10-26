@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Contratos.Core.Enums;
 
 namespace Contratos.Core.Entities;
 
@@ -62,6 +63,17 @@ public class ConfiguracaoSistema
 
     [Range(15, 180)]
     public int MargemGlobalDiasAlertaVencimento { get; set; } = 60;
+
+    // Parâmetros Contábeis, Tributários e de Orçamento
+    [Column(TypeName = "decimal(5,2)")]
+    [Range(0, 99.99)]
+    public decimal AliquotaPadraoImpostosPercentual { get; set; } = 14.25m;
+
+    public ModalidadeValorOrcamento ModalidadeOrcamentoPadrao { get; set; } = ModalidadeValorOrcamento.ValorBrutoComImpostos;
+
+    [Column(TypeName = "decimal(5,2)")]
+    [Range(0, 50)]
+    public decimal TaxaInflacaoSimuladaPadrao { get; set; } = 4.50m;
 
     // Integração Active Directory (LDAP)
     public bool LdapAtivo { get; set; } = false;

@@ -54,6 +54,9 @@ public class AdminController : Controller
         atual.SplashTitulo = model.SplashTitulo;
         atual.SplashSlogan = model.SplashSlogan;
         atual.MargemGlobalDiasAlertaVencimento = Math.Clamp(model.MargemGlobalDiasAlertaVencimento, 15, 180);
+        atual.AliquotaPadraoImpostosPercentual = Math.Clamp(model.AliquotaPadraoImpostosPercentual, 0m, 99.99m);
+        atual.ModalidadeOrcamentoPadrao = model.ModalidadeOrcamentoPadrao;
+        atual.TaxaInflacaoSimuladaPadrao = Math.Clamp(model.TaxaInflacaoSimuladaPadrao, 0m, 50m);
 
         if (logoUpload != null && logoUpload.Length > 0)
         {

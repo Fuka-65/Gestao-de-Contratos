@@ -1,0 +1,503 @@
+@model OrcamentoProjecaoViewModel
+@{
+    ViewData["Title"] = $"Planejamento Orçamentário & Projeção Fiscal ({Model.TituloPeriodo})";
+    bool isLiquido = Model.ModalidadeContabil == ModalidadeValorOrcamento.ValorLiquidoSemImpostos;
+}
+
+<!-- Barra Rápida de Periodicidades (1, 2, 3, 4, 6, 12 ou N Meses) & Parametrização Contábil -->
+<div class="corp-card p-3 mb-4">
+    <form method="get" asp-action="Index" id="formOrcamento">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pb-3 mb-3 border-bottom">
+            <div class="d-flex flex-wrap align-items-center gap-1">
+                <span class="small fw-bold text-uppercase text-secondary me-2">
+                    <i class="bi bi-calendar3-range me-1"></i>Horizonte:
+                </span>
+                @foreach (var preset in new[] {
+                    (TipoPeriodoOrcamento.Mensal, "Mensal (1m)", 1),
+                    (TipoPeriodoOrcamento.Bimestral, "Bimestral (2m)", 2),
+                    (TipoPeriodoOrcamento.Trimestral, "Trimestral (3m)", 3),
+                    (TipoPeriodoOrcamento.Quadrimestral, "Quadrimestral (4m)", 4),
+                    (TipoPeriodoOrcamento.Semestral, "Semestral (6m)", 6),
+                    (TipoPeriodoOrcamento.Anual, "Anual (12m)", 12)
+                })
+                {
+                    bool ativo = Model.PeriodoSelecionado == preset.Item1 && Model.QuantidadeMeses == preset.Item3;
+                    <button type="button"
+                            class="btn btn-sm @(ativo ? "btn-teal" : "btn-outline-secondary")"
+                            onclick="selecionarPreset('@preset.Item1', @preset.Item3)">
+                        @preset.Item2
+                    </button>
+                }
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <a href="@Url.Action("ExportarCsv", new {
+                    periodo = Model.PeriodoSelecionado,
+                    mesesPersonalizado = Model.QuantidadeMeses,
+                    mesInicial = Model.MesInicial,
+                    anoInicial = Model.AnoInicial,
+                    modalidade = Model.ModalidadeContabil,
+                    considerarRenovacao = Model.ConsiderarRenovacaoAutomatica,
+                    reajusteSimulado = Model.PercentualReajusteSimulado,
+                    categoria = Model.CategoriaFiltro,
+                    departamento = Model.DepartamentoFiltro
+                })" class="btn btn-sm btn-outline-dark">
+                    <i class="bi bi-file-earmark-spreadsheet me-1 text-success"></i>Exportar CSV / ERP
+                </a>
+            </div>
+        </div>
+
+        <input type="hidden" name="periodo" id="inputPeriodo" value="@Model.PeriodoSelecionado" />
+
+        <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-semibold mb-1">Nº de Meses (1 a 60)</label>
+                <div class="input-group input-group-sm">
+                    <input type="number" name="mesesPersonalizado" id="inputMesesPersonalizado"
+                           min="1" max="60" value="@Model.QuantidadeMeses"
+                           class="form-control fw-bold"
+                           onchange="document.getElementById('inputPeriodo').value='Personalizado'" />
+                    <span class="input-group-text">meses</span>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-semibold mb-1">Início da Projeção</label>
+                <div class="input-group input-group-sm">
+                    <input type="number" name="mesInicial" min="1" max="12" value="@Model.MesInicial" class="form-control" title="Mês Inicial" />
+                    <span class="input-group-text">/</span>
+                    <input type="number" name="anoInicial" min="2024" max="2035" value="@Model.AnoInicial" class="form-control" title="Ano Inicial" />
+                </div>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label class="form-label small fw-semibold mb-1">Regime de Contabilização Orçamentária</label>
+                <select name="modalidade" class="form-select form-select-sm fw-semibold" asp-for="ModalidadeContabil" asp-items="Html.GetEnumSelectList<ModalidadeValorOrcamento>()"></select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-semibold mb-1" title="Simula reajuste nos aniversários contratuais">Stress Reajuste (% a.a.)</label>
+                <div class="input-group input-group-sm">
+                    <input type="number" step="0.1" min="0" max="50" name="reajusteSimulado" value="@Model.PercentualReajusteSimulado.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" class="form-control" />
+                    <span class="input-group-text">%</span>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-semibold mb-1">Departamento</label>
+                <select name="departamento" class="form-select form-select-sm">
+                    <option value="">Todos os Deptos</option>
+                    @foreach (var dep in Model.DepartamentosDisponiveis)
+                    {
+                        <option value="@dep" selected="@(string.Equals(Model.DepartamentoFiltro, dep, StringComparison.OrdinalIgnoreCase))">@dep</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 col-md-1 d-grid">
+                <button type="submit" class="btn btn-sm btn-teal">
+                    <i class="bi bi-calculator me-1"></i>Projetar
+                </button>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-2 pt-2 border-top small text-secondary">
+            <div class="form-check form-switch m-0">
+                <input class="form-check-input" type="checkbox" name="considerarRenovacao" value="true" id="chkRenovacao" checked="@Model.ConsiderarRenovacaoAutomatica" onchange="this.form.submit()" />
+                <label class="form-check-label fw-semibold" for="chkRenovacao">
+                    Projetar continuidade dos contratos com cláusula de Renovação Automática após o término atual
+                </label>
+            </div>
+            <div>
+                <span class="badge badge-teal me-1">@Model.IntervaloCompetenciasLabel</span>
+                <span class="badge bg-light text-dark border">
+                    Base Ativa: @(isLiquido ? "LÍQUIDO SEM IMPOSTOS" : "BRUTO COM IMPOSTOS")
+                </span>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- 1. KPIs do Orçamento Projetado, Impostos Apurados e Composição OPEX / CAPEX -->
+<div class="row g-3 mb-4">
+    <!-- KPI 1: Orçamento Contabilizado (Bruto ou Líquido conforme parametrização) -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="kpi-card kpi-primary">
+            <div class="kpi-content">
+                <div class="kpi-label" title="Orçamento @(isLiquido ? "Líquido" : "Bruto") (@Model.QuantidadeMeses meses)">
+                    Orçamento @(isLiquido ? "Líquido" : "Bruto") (@(Model.QuantidadeMeses)m)
+                </div>
+                <div class="kpi-value" title="@Model.TotalOrcamentoContabilizado.ToString("C2")">
+                    @Model.TotalOrcamentoContabilizado.ToString("C2")
+                </div>
+                <div class="kpi-subtext">
+                    Média mensal: <strong>@Model.MediaMensalContabilizada.ToString("C2")</strong>
+                </div>
+            </div>
+            <div class="kpi-icon-box">
+                <i class="bi bi-calculator-fill"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI 2: Impostos Apurados no Período -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="kpi-card kpi-danger">
+            <div class="kpi-content">
+                <div class="kpi-label" title="Total de Impostos Apurados no Período">Impostos Apurados (@(Model.QuantidadeMeses)m)</div>
+                <div class="kpi-value" style="color: var(--color-terracotta-red);" title="@Model.TotalImpostosApuradosProjetado.ToString("C2")">
+                    @Model.TotalImpostosApuradosProjetado.ToString("C2")
+                </div>
+                <div class="kpi-subtext" title="Bruto: @Model.TotalBrutoProjetado.ToString("C2") | Líquido: @Model.TotalLiquidoProjetado.ToString("C2")">
+                    @(isLiquido ? $"Bruto c/ imp.: {Model.TotalBrutoProjetado:C2}" : $"Líquido s/ imp.: {Model.TotalLiquidoProjetado:C2}")
+                </div>
+            </div>
+            <div class="kpi-icon-box">
+                <i class="bi bi-bank2"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI 3: Despesa Operacional Projetada (OPEX) -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="kpi-card kpi-secondary">
+            <div class="kpi-content">
+                <div class="kpi-label" title="Total OPEX (Despesa Operacional)">Projeção OPEX (@Model.PercentualOpex.ToString("N1")%)</div>
+                <div class="kpi-value" style="color: var(--color-vibrant-teal);" title="@Model.TotalOpexContabilizado.ToString("C2")">
+                    @Model.TotalOpexContabilizado.ToString("C2")
+                </div>
+                <div class="kpi-subtext">Custeio operacional recorrente</div>
+            </div>
+            <div class="kpi-icon-box">
+                <i class="bi bi-gear-wide-connected"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI 4: Investimento em Capital Projetado (CAPEX) & Stress Inflacionário -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="kpi-card kpi-warning">
+            <div class="kpi-content">
+                <div class="kpi-label" title="Total CAPEX (Investimento em Capital)">Projeção CAPEX (@Model.PercentualCapex.ToString("N1")%)</div>
+                <div class="kpi-value" style="color: #b86609;" title="@Model.TotalCapexContabilizado.ToString("C2")">
+                    @Model.TotalCapexContabilizado.ToString("C2")
+                </div>
+                <div class="kpi-subtext" title="Impacto de Reajuste Simulado: @Model.ImpactoReajusteInflacionarioNoPeriodo.ToString("C2")">
+                    Efeito Reajuste: +@Model.ImpactoReajusteInflacionarioNoPeriodo.ToString("C2")
+                </div>
+            </div>
+            <div class="kpi-icon-box">
+                <i class="bi bi-layers-half"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Gráficos de Projeção Orçamentária (Curva Mês a Mês OPEX/CAPEX/Impostos e Composição Contábil) -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-xl-8">
+        <div class="corp-card h-100">
+            <div class="corp-card-header">
+                <h2 class="corp-card-title">
+                    <i class="bi bi-graph-up-arrow me-2" style="color: var(--color-vibrant-teal);"></i>
+                    Curva de Projeção Orçamentária Mês a Mês: OPEX, CAPEX &amp; Impostos Apurados (@Model.IntervaloCompetenciasLabel)
+                </h2>
+                <span class="badge badge-teal">@(isLiquido ? "Visão Líquida s/ Impostos" : "Visão Bruta c/ Impostos")</span>
+            </div>
+            <div class="p-3">
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="chartCurvaOrcamento"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-4">
+        <div class="corp-card h-100">
+            <div class="corp-card-header">
+                <h2 class="corp-card-title">
+                    <i class="bi bi-pie-chart-fill me-2" style="color: var(--color-deep-teal);"></i>
+                    Decomposição Tributária &amp; Contábil
+                </h2>
+            </div>
+            <div class="p-3 d-flex flex-column justify-content-between">
+                <div style="position: relative; height: 210px; width: 100%;">
+                    <canvas id="chartDecomposicaoTributaria"></canvas>
+                </div>
+                <div class="mt-3 pt-2 border-top small">
+                    <div class="d-flex justify-content-between py-1">
+                        <span class="text-secondary">Orçamento Bruto Total:</span>
+                        <strong>@Model.TotalBrutoProjetado.ToString("C2")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 text-danger">
+                        <span>(-) Impostos Apurados:</span>
+                        <strong>@Model.TotalImpostosApuradosProjetado.ToString("C2")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-top fw-bold" style="color: var(--color-deep-teal);">
+                        <span>(=) Orçamento Líquido:</span>
+                        <span>@Model.TotalLiquidoProjetado.ToString("C2")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Matriz de Projeção Orçamentária por Contrato (Com OPEX, CAPEX, Bruto, Impostos e Líquido) -->
+<div class="corp-card mb-4">
+    <div class="corp-card-header">
+        <h2 class="corp-card-title">
+            <i class="bi bi-table me-2"></i>
+            Detalhamento Orçamentário por Contrato no Período (@Model.TotalContratosAtivosNaProjecao contratos ativos na projeção)
+        </h2>
+        <span class="badge bg-light text-dark border">
+            Coluna Contabilizada: @(isLiquido ? "Valor Líquido (Sem Impostos)" : "Valor Bruto (Com Impostos)")
+        </span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-corp mb-0">
+            <thead>
+                <tr>
+                    <th>Contrato</th>
+                    <th>Fornecedor / Objeto</th>
+                    <th class="text-center">Meses</th>
+                    <th class="text-end">Alíq. Imp.</th>
+                    <th class="text-end">Total Bruto</th>
+                    <th class="text-end">Impostos Apurados</th>
+                    <th class="text-end">Total Líquido</th>
+                    <th class="text-end">OPEX (@(isLiquido ? "Líq" : "Bruto"))</th>
+                    <th class="text-end">CAPEX (@(isLiquido ? "Líq" : "Bruto"))</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model.ContratosProjetados)
+                {
+                    <tr>
+                        <td>
+                            <a href="@Url.Action("Details", "Contratos", new { id = c.ContratoId })" class="fw-bold text-decoration-none" style="color: var(--color-deep-teal);">
+                                @c.NumeroContrato
+                            </a>
+                            <div class="small text-muted">
+                                @c.CentroDeCusto
+                                @if (c.SofreuReajusteNaProjecao)
+                                {
+                                    <span class="badge badge-amber ms-1" title="Inclui reajuste contratual simulado no aniversário">Reajustado</span>
+                                }
+                            </div>
+                        </td>
+                        <td title="@c.TituloObjeto">
+                            <div class="fw-semibold text-nowrap-ellipsis" style="max-width: 210px;">@c.FornecedorNome</div>
+                            <div class="small text-muted text-nowrap-ellipsis" style="max-width: 210px;">@c.TituloObjeto</div>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-teal">@c.MesesAtivosNoPeriodo / @Model.QuantidadeMeses</span>
+                        </td>
+                        <td class="text-end">@c.AliquotaImpostosPercentual.ToString("N2")%</td>
+                        <td class="text-end @(!isLiquido ? "fw-bold text-dark" : "text-secondary")">@c.TotalBrutoNoPeriodo.ToString("C2")</td>
+                        <td class="text-end text-danger fw-semibold">@c.TotalImpostosNoPeriodo.ToString("C2")</td>
+                        <td class="text-end @(isLiquido ? "fw-bold text-dark" : "text-secondary")">@c.TotalLiquidoNoPeriodo.ToString("C2")</td>
+                        <td class="text-end fw-semibold" style="color: var(--color-deep-teal);">@c.TotalOpexNoPeriodo.ToString("C2")</td>
+                        <td class="text-end fw-semibold" style="color: #b86609;">@c.TotalCapexNoPeriodo.ToString("C2")</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot class="table-light fw-bold">
+                <tr>
+                    <td colspan="4" class="text-end text-uppercase">Totais Consolidados (@Model.TituloPeriodo):</td>
+                    <td class="text-end">@Model.TotalBrutoProjetado.ToString("C2")</td>
+                    <td class="text-end text-danger">@Model.TotalImpostosApuradosProjetado.ToString("C2")</td>
+                    <td class="text-end">@Model.TotalLiquidoProjetado.ToString("C2")</td>
+                    <td class="text-end" style="color: var(--color-deep-teal);">@Model.TotalOpexContabilizado.ToString("C2")</td>
+                    <td class="text-end" style="color: #b86609;">@Model.TotalCapexContabilizado.ToString("C2")</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<!-- 4. Consolidação por Centro de Custo / Departamento & Cronograma Mensal de Desembolso -->
+<div class="row g-4">
+    <div class="col-12 col-xl-6">
+        <div class="corp-card h-100">
+            <div class="corp-card-header">
+                <h2 class="corp-card-title">
+                    <i class="bi bi-diagram-3 me-2"></i>Orçamento Alocado por Departamento &amp; Centro de Custo
+                </h2>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-corp mb-0">
+                    <thead>
+                        <tr>
+                            <th>Departamento / CC</th>
+                            <th class="text-end">OPEX</th>
+                            <th class="text-end">CAPEX</th>
+                            <th class="text-end">Impostos</th>
+                            <th class="text-end">Total (@(isLiquido ? "Líq" : "Bruto"))</th>
+                            <th class="text-end">%</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var d in Model.OrcamentoPorDepartamento)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">@d.Departamento</div>
+                                    <div class="small text-muted"><code>@d.CentroDeCusto</code></div>
+                                </td>
+                                <td class="text-end">@d.TotalOpexPeriodo.ToString("C2")</td>
+                                <td class="text-end">@d.TotalCapexPeriodo.ToString("C2")</td>
+                                <td class="text-end text-danger">@d.TotalImpostosPeriodo.ToString("C2")</td>
+                                <td class="text-end fw-bold" style="color: var(--color-deep-teal);">@d.TotalContabilizadoPeriodo.ToString("C2")</td>
+                                <td class="text-end"><span class="badge badge-teal">@d.ParticipacaoPercentual.ToString("N1")%</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+        <div class="corp-card h-100">
+            <div class="corp-card-header">
+                <h2 class="corp-card-title">
+                    <i class="bi bi-calendar2-week me-2"></i>Cronograma Mensal de Desembolso (Cashflow Forecast)
+                </h2>
+            </div>
+            <div class="table-responsive" style="max-height: 360px;">
+                <table class="table table-sm table-hover table-corp mb-0">
+                    <thead>
+                        <tr>
+                            <th>Competência</th>
+                            <th class="text-center">Ativos</th>
+                            <th class="text-end">Bruto</th>
+                            <th class="text-end">Impostos</th>
+                            <th class="text-end">Líquido</th>
+                            <th class="text-end">OPEX / CAPEX</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var m in Model.EvolucaoMensal)
+                        {
+                            <tr>
+                                <td class="fw-bold">
+                                    @m.CompetenciaLabel
+                                    @if (m.ContratosComReajusteNoMes > 0)
+                                    {
+                                        <i class="bi bi-arrow-up-right-circle-fill text-warning ms-1" title="@m.ContratosComReajusteNoMes contrato(s) com reajuste aplicado"></i>
+                                    }
+                                </td>
+                                <td class="text-center"><span class="badge bg-light text-dark border">@m.QuantidadeContratosAtivos</span></td>
+                                <td class="text-end">@m.ValorBruto.ToString("C2")</td>
+                                <td class="text-end text-danger">@m.ValorImpostos.ToString("C2")</td>
+                                <td class="text-end fw-semibold">@m.ValorLiquido.ToString("C2")</td>
+                                <td class="text-end small">
+                                    <span class="text-dark">@m.ValorOpexContabilizado.ToString("C0")</span> /
+                                    <span style="color: #b86609;">@m.ValorCapexContabilizado.ToString("C0")</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script>
+        function selecionarPreset(nomePeriodo, qtdMeses) {
+            document.getElementById('inputPeriodo').value = nomePeriodo;
+            document.getElementById('inputMesesPersonalizado').value = qtdMeses;
+            document.getElementById('formOrcamento').submit();
+        }
+
+        (function () {
+            const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.EvolucaoMensal.Select(x => x.CompetenciaLabel)));
+            const opexData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.EvolucaoMensal.Select(x => x.ValorOpexContabilizado)));
+            const capexData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.EvolucaoMensal.Select(x => x.ValorCapexContabilizado)));
+            const impostosData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.EvolucaoMensal.Select(x => x.ValorImpostos)));
+
+            const ctxCurva = document.getElementById('chartCurvaOrcamento');
+            if (ctxCurva) {
+                new Chart(ctxCurva, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                type: 'line',
+                                label: 'Impostos Apurados (R$)',
+                                data: impostosData,
+                                borderColor: '#b6462e',
+                                backgroundColor: 'rgba(182, 70, 46, 0.15)',
+                                borderWidth: 2,
+                                tension: 0.3,
+                                pointRadius: 3
+                            },
+                            {
+                                type: 'bar',
+                                label: 'OPEX Contabilizado (R$)',
+                                data: opexData,
+                                backgroundColor: '#004d5d',
+                                stack: 'Stack 0',
+                                borderRadius: 4
+                            },
+                            {
+                                type: 'bar',
+                                label: 'CAPEX Contabilizado (R$)',
+                                data: capexData,
+                                backgroundColor: '#f69f3a',
+                                stack: 'Stack 0',
+                                borderRadius: 4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { stacked: true },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (v) { return 'R$ ' + v.toLocaleString('pt-BR'); }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const ctxTrib = document.getElementById('chartDecomposicaoTributaria');
+            if (ctxTrib) {
+                new Chart(ctxTrib, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['OPEX Líquido', 'CAPEX Líquido', 'Impostos Apurados'],
+                        datasets: [{
+                            data: [
+                                @Model.TotalOpexLiquidoProjetado.ToString("F2", System.Globalization.CultureInfo.InvariantCulture),
+                                @Model.TotalCapexLiquidoProjetado.ToString("F2", System.Globalization.CultureInfo.InvariantCulture),
+                                @Model.TotalImpostosApuradosProjetado.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)
+                            ],
+                            backgroundColor: ['#004d5d', '#f69f3a', '#b6462e'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '60%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                        }
+                    }
+                });
+            }
+        })();
+    </script>
+}

@@ -133,6 +133,17 @@ public class JsonClmRepository : IClmRepository
 
         foreach (var c in snapshot.Contratos)
         {
+            if (!c.ValorOpexMensal.HasValue && !c.ValorCapexMensal.HasValue)
+            {
+                if (c.Id == 1) { c.ValorOpexMensal = 41500m; c.ValorCapexMensal = 7000m; c.AliquotaImpostosPercentual = 14.25m; }
+                else if (c.Id == 2) { c.ValorOpexMensal = 44000m; c.ValorCapexMensal = 18000m; c.AliquotaImpostosPercentual = 14.25m; }
+                else if (c.Id == 3) { c.ValorOpexMensal = 26200m; c.ValorCapexMensal = 8000m; c.AliquotaImpostosPercentual = 16.33m; }
+                else if (c.Id == 4) { c.ValorOpexMensal = 78000m; c.ValorCapexMensal = 0m; c.AliquotaImpostosPercentual = 18.65m; }
+                else if (c.Id == 5) { c.ValorOpexMensal = 22500m; c.ValorCapexMensal = 0m; c.AliquotaImpostosPercentual = 11.15m; }
+                else if (c.Id == 6) { c.ValorOpexMensal = 49000m; c.ValorCapexMensal = 5000m; c.AliquotaImpostosPercentual = 9.25m; }
+                else if (c.Id == 7) { c.ValorOpexMensal = 12000m; c.ValorCapexMensal = 6000m; c.AliquotaImpostosPercentual = 14.25m; }
+            }
+
             if (fornecedoresDict.TryGetValue(c.FornecedorId, out var forn))
             {
                 c.Fornecedor = forn;
@@ -466,6 +477,9 @@ public class JsonClmRepository : IClmRepository
                 existente.DataTerminoVigencia = contrato.DataTerminoVigencia;
                 existente.ValorMensalContratado = contrato.ValorMensalContratado;
                 existente.ValorGlobalContrato = contrato.ValorGlobalContrato;
+                existente.ValorOpexMensal = contrato.ValorOpexMensal;
+                existente.ValorCapexMensal = contrato.ValorCapexMensal;
+                existente.AliquotaImpostosPercentual = contrato.AliquotaImpostosPercentual;
                 existente.Moeda = contrato.Moeda;
                 existente.IndiceReajuste = contrato.IndiceReajuste;
                 existente.PeriodicidadeReajusteMeses = contrato.PeriodicidadeReajusteMeses;

@@ -70,6 +70,25 @@
 
                     <div class="col-12 mt-4">
                         <h6 class="fw-bold border-bottom pb-2" style="color: var(--color-deep-teal);">
+                            <i class="bi bi-calculator me-1"></i>Parâmetros Contábeis, Tributários e de Orçamento
+                        </h6>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="ModalidadeOrcamentoPadrao" class="form-label small fw-semibold">Base Contábil Padrão do Orçamento</label>
+                        <select asp-for="ModalidadeOrcamentoPadrao" class="form-select" asp-items="Html.GetEnumSelectList<ModalidadeValorOrcamento>()"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="AliquotaPadraoImpostosPercentual" class="form-label small fw-semibold">Alíquota Padrão de Impostos (%)</label>
+                        <input asp-for="AliquotaPadraoImpostosPercentual" type="number" step="0.01" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="TaxaInflacaoSimuladaPadrao" class="form-label small fw-semibold">Taxa Anual Padrão de Reajuste Simulado (%)</label>
+                        <input asp-for="TaxaInflacaoSimuladaPadrao" type="number" step="0.01" class="form-control" />
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <h6 class="fw-bold border-bottom pb-2" style="color: var(--color-deep-teal);">
                             <i class="bi bi-stars me-1"></i>Parametrização da Splash Screen Corporativa
                         </h6>
                     </div>
