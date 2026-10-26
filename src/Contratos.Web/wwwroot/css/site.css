@@ -1,18 +1,48 @@
 /* ==========================================================================
-   IDENTIDADE VISUAL INSTITUCIONAL - GESTÃO DE CONTRATOS (CLM) & AUDITORIA
-   Paleta Pantone Oficial e Diretrizes Corporativas
+   XHARA — IDENTIDADE VISUAL INSTITUCIONAL (CLM & AUDITORIA FINANCEIRA)
+   Paleta Oficial Pantone Xhara (9 Cores):
+   - Pantone 6049 C : #b6462e (RGB 182, 70, 46)   - Terracotta Red (Crítico / Desvio / Impostos)
+   - Pantone 2011 C : #f69f3a (RGB 246, 159, 58)  - Warm Amber (Alerta / Atenção / CAPEX)
+   - Pantone 3145 C : #007889 (RGB 0, 120, 137)   - Vibrant Teal (Secundária / Ações / Seleções)
+   - Pantone 3035 C : #004d5d (RGB 0, 77, 93)     - Deep Teal (Primária Institucional Xhara)
+   - Pantone Black 6 C: #191919 (RGB 25, 25, 25)  - Dark Charcoal (Tipografia Principal & Contraste)
+   - Pantone 8402 C : #606060 (RGB 96, 96, 96)    - Medium Gray (Textos Secundários & Rótulos)
+   - Pantone Cool Gray 6 C: #a2a7a7 (RGB 162, 167, 167) - Cool Gray (Linhas, Divisores & Bordas)
+   - Pantone 9345 C : #e8e7e5 (RGB 232, 231, 229) - Soft Off-White (Background Geral Limpo)
+   - Surface White  : #ffffff (RGB 255, 255, 255) - Cards, Tabelas e Superfícies de Leitura
    ========================================================================== */
 
 :root {
-    --color-deep-teal: #004d5d;        /* Pantone 3035 C - Cor Primária */
-    --color-vibrant-teal: #007889;     /* Pantone 3145 C - Cor Secundária */
-    --color-warm-amber: #f69f3a;       /* Pantone 2011 C - Alerta / Atenção */
-    --color-terracotta-red: #b6462e;   /* Pantone 6049 C - Crítico / Desvio */
-    --color-dark-charcoal: #191919;    /* Pantone Black 6 C - Menus e Tipografia */
-    --color-medium-gray: #606060;      /* Pantone 8402 C - Textos Secundários */
-    --color-cool-gray: #a2a7a7;        /* Pantone Cool Gray 6 C - Bordas */
-    --color-bg-body: #e8e7e5;          /* Pantone 9345 C - Soft Off-White */
+    --color-deep-teal: #004d5d;        /* Pantone 3035 C */
+    --color-vibrant-teal: #007889;     /* Pantone 3145 C */
+    --color-warm-amber: #f69f3a;       /* Pantone 2011 C */
+    --color-terracotta-red: #b6462e;   /* Pantone 6049 C */
+    --color-dark-charcoal: #191919;    /* Pantone Black 6 C */
+    --color-medium-gray: #606060;      /* Pantone 8402 C */
+    --color-cool-gray: #a2a7a7;        /* Pantone Cool Gray 6 C */
+    --color-bg-body: #e8e7e5;          /* Pantone 9345 C */
     --color-surface-white: #ffffff;    /* Surface White */
+
+    /* Sobrescrita Global do Bootstrap 5.3 para respeitar 100% a paleta Xhara */
+    --bs-primary: #004d5d;
+    --bs-primary-rgb: 0, 77, 93;
+    --bs-secondary: #606060;
+    --bs-secondary-rgb: 96, 96, 96;
+    --bs-info: #007889;
+    --bs-info-rgb: 0, 120, 137;
+    --bs-warning: #f69f3a;
+    --bs-warning-rgb: 246, 159, 58;
+    --bs-danger: #b6462e;
+    --bs-danger-rgb: 182, 70, 46;
+    --bs-dark: #191919;
+    --bs-dark-rgb: 25, 25, 25;
+    --bs-light: #e8e7e5;
+    --bs-light-rgb: 232, 231, 229;
+    --bs-body-bg: #e8e7e5;
+    --bs-body-color: #191919;
+    --bs-border-color: #d0d4d4;
+    --bs-link-color: #007889;
+    --bs-link-hover-color: #004d5d;
 
     --sidebar-width-expanded: 260px;
     --sidebar-width-collapsed: 68px;
@@ -30,8 +60,57 @@ body {
     background-color: var(--color-bg-body);
     color: var(--color-dark-charcoal);
     font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-    font-size: 0.925rem;
+    font-size: 0.935rem;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+}
+
+/* ==========================================================================
+   CONTROLES DE FORMULÁRIO & FOCO DE LEITURA AGRADÁVEL (PALETA XHARA)
+   ========================================================================== */
+
+.form-control,
+.form-select {
+    border-color: var(--color-cool-gray);
+    color: var(--color-dark-charcoal);
+    background-color: var(--color-surface-white);
+    border-radius: 7px;
+    font-size: 0.9rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-vibrant-teal);
+    box-shadow: 0 0 0 0.2rem rgba(0, 120, 137, 0.18);
+}
+
+.form-check-input:checked {
+    background-color: var(--color-vibrant-teal);
+    border-color: var(--color-vibrant-teal);
+}
+
+.form-check-input:focus {
+    border-color: var(--color-vibrant-teal);
+    box-shadow: 0 0 0 0.2rem rgba(0, 120, 137, 0.2);
+}
+
+.text-muted,
+.text-secondary {
+    color: var(--color-medium-gray) !important;
+}
+
+.text-danger {
+    color: var(--color-terracotta-red) !important;
+}
+
+code {
+    color: var(--color-deep-teal);
+    background-color: rgba(0, 120, 137, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
 }
 
 /* ==========================================================================
@@ -50,13 +129,13 @@ body {
     left: 0;
     bottom: 0;
     width: var(--sidebar-width-expanded);
-    background: linear-gradient(180deg, var(--color-deep-teal) 0%, #003542 55%, var(--color-dark-charcoal) 100%);
-    color: #ffffff;
+    background: linear-gradient(180deg, var(--color-deep-teal) 0%, #003b48 68%, var(--color-dark-charcoal) 100%);
+    color: var(--color-surface-white);
     z-index: 1040;
     display: flex;
     flex-direction: column;
     transition: width 0.28s var(--transition-smooth);
-    box-shadow: 4px 0 18px rgba(0, 0, 0, 0.14);
+    box-shadow: 3px 0 16px rgba(25, 25, 25, 0.14);
     overflow-x: hidden;
 }
 
@@ -79,31 +158,30 @@ html.sidebar-collapsed .app-main {
     width: calc(100% - var(--sidebar-width-collapsed));
 }
 
-/* Cabeçalho da Sidebar */
+/* Cabeçalho da Sidebar Xhara */
 .sidebar-brand {
     height: var(--topbar-height);
     display: flex;
     align-items: center;
-    padding: 0 18px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0 16px;
+    border-bottom: 1px solid rgba(162, 167, 167, 0.2);
     text-decoration: none;
-    color: #ffffff !important;
+    color: var(--color-surface-white) !important;
     white-space: nowrap;
     overflow: hidden;
 }
 
 .sidebar-brand-icon {
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
-    border-radius: 8px;
-    background: var(--color-vibrant-teal);
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 9px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
-    color: #ffffff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
 }
 
 .sidebar-brand-text {
@@ -114,17 +192,20 @@ html.sidebar-collapsed .app-main {
 }
 
 .sidebar-brand-title {
-    font-weight: 700;
-    font-size: 0.98rem;
-    letter-spacing: 0.3px;
-    line-height: 1.2;
+    font-weight: 800;
+    font-size: 1.08rem;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    line-height: 1.15;
+    color: var(--color-surface-white);
 }
 
 .sidebar-brand-subtitle {
-    font-size: 0.72rem;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.68rem;
+    color: var(--color-cool-gray);
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 1px;
+    font-weight: 600;
 }
 
 /* Navegação da Sidebar */
@@ -140,8 +221,8 @@ html.sidebar-collapsed .app-main {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.5);
-    padding: 12px 12px 6px;
+    color: var(--color-cool-gray);
+    padding: 14px 12px 6px;
     white-space: nowrap;
 }
 
@@ -152,12 +233,13 @@ html.sidebar-collapsed .app-main {
     padding: 10px 14px;
     margin-bottom: 4px;
     border-radius: 8px;
-    color: rgba(255, 255, 255, 0.82);
+    color: rgba(255, 255, 255, 0.86);
     text-decoration: none;
     font-weight: 500;
     font-size: 0.9rem;
     white-space: nowrap;
     transition: all 0.18s ease;
+    border-left: 3px solid transparent;
 }
 
 .sidebar-link i {
@@ -168,22 +250,23 @@ html.sidebar-collapsed .app-main {
 }
 
 .sidebar-link:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background-color: rgba(0, 120, 137, 0.32);
+    color: var(--color-surface-white);
 }
 
 .sidebar-link.active {
-    background: linear-gradient(90deg, var(--color-vibrant-teal) 0%, #0092a6 100%);
-    color: #ffffff;
+    background-color: var(--color-vibrant-teal);
+    color: var(--color-surface-white);
     font-weight: 600;
-    box-shadow: 0 3px 10px rgba(0, 120, 137, 0.4);
+    border-left-color: var(--color-warm-amber);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-footer {
     padding: 12px 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(162, 167, 167, 0.18);
     font-size: 0.74rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--color-cool-gray);
     white-space: nowrap;
 }
 
@@ -207,6 +290,7 @@ html.sidebar-collapsed .sidebar-nav {
 html.sidebar-collapsed .sidebar-link {
     justify-content: center;
     padding: 11px 0;
+    border-left-width: 0;
 }
 
 html.sidebar-collapsed .sidebar-link i {
@@ -221,7 +305,7 @@ html.sidebar-collapsed .sidebar-link i {
 .app-topbar {
     height: var(--topbar-height);
     background-color: var(--color-surface-white);
-    border-bottom: 1px solid rgba(162, 167, 167, 0.45);
+    border-bottom: 1px solid rgba(162, 167, 167, 0.5);
     padding: 0 24px;
     display: flex;
     align-items: center;
@@ -229,14 +313,14 @@ html.sidebar-collapsed .sidebar-link i {
     position: sticky;
     top: 0;
     z-index: 1030;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 2px 8px rgba(25, 25, 25, 0.04);
 }
 
 .btn-sidebar-toggle {
     width: 38px;
     height: 38px;
     border-radius: 8px;
-    border: 1px solid rgba(162, 167, 167, 0.5);
+    border: 1px solid var(--color-cool-gray);
     background: var(--color-surface-white);
     color: var(--color-deep-teal);
     display: inline-flex;
@@ -249,12 +333,12 @@ html.sidebar-collapsed .sidebar-link i {
 
 .btn-sidebar-toggle:hover {
     background-color: var(--color-deep-teal);
-    color: #ffffff;
+    color: var(--color-surface-white);
     border-color: var(--color-deep-teal);
 }
 
 .topbar-page-title {
-    font-size: 1.08rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--color-deep-teal);
     margin: 0;
@@ -268,10 +352,10 @@ html.sidebar-collapsed .sidebar-link i {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 5px 12px 5px 6px;
+    padding: 5px 14px 5px 6px;
     border-radius: 50px;
-    border: 1px solid rgba(162, 167, 167, 0.45);
-    background-color: #ffffff;
+    border: 1px solid var(--color-cool-gray);
+    background-color: var(--color-surface-white);
     color: var(--color-dark-charcoal);
     font-weight: 600;
     font-size: 0.88rem;
@@ -281,7 +365,7 @@ html.sidebar-collapsed .sidebar-link i {
 
 .user-profile-btn:hover {
     border-color: var(--color-vibrant-teal);
-    background-color: #f8fbfc;
+    background-color: rgba(232, 231, 229, 0.45);
 }
 
 .user-avatar-circle {
@@ -289,7 +373,7 @@ html.sidebar-collapsed .sidebar-link i {
     height: 32px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--color-deep-teal), var(--color-vibrant-teal));
-    color: #ffffff;
+    color: var(--color-surface-white);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -299,17 +383,18 @@ html.sidebar-collapsed .sidebar-link i {
 }
 
 .dropdown-menu-profile {
-    min-width: 270px;
-    border: 1px solid rgba(162, 167, 167, 0.45);
+    min-width: 275px;
+    border: 1px solid var(--color-cool-gray);
     border-radius: 12px;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 12px 28px rgba(25, 25, 25, 0.14);
     padding: 0;
     overflow: hidden;
+    background-color: var(--color-surface-white);
 }
 
 .profile-dropdown-header {
-    background: linear-gradient(135deg, var(--color-deep-teal), #003845);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--color-deep-teal), var(--color-vibrant-teal));
+    color: var(--color-surface-white);
     padding: 16px;
 }
 
@@ -321,9 +406,9 @@ html.sidebar-collapsed .sidebar-link i {
     background-color: var(--color-surface-white);
     border-radius: 10px;
     padding: 15px 16px;
-    border: 1px solid rgba(162, 167, 167, 0.35);
+    border: 1px solid rgba(162, 167, 167, 0.55);
     border-left-width: 5px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 2px 6px rgba(25, 25, 25, 0.04);
     height: 100%;
     display: flex;
     align-items: center;
@@ -343,7 +428,7 @@ html.sidebar-collapsed .sidebar-link i {
 }
 
 .kpi-label {
-    font-size: 0.76rem;
+    font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -358,14 +443,14 @@ html.sidebar-collapsed .sidebar-link i {
     font-size: clamp(1.15rem, 1.35vw, 1.45rem);
     font-weight: 800;
     color: var(--color-dark-charcoal);
-    line-height: 1.2;
+    line-height: 1.25;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .kpi-subtext {
-    font-size: 0.76rem;
+    font-size: 0.77rem;
     color: var(--color-medium-gray);
     margin-top: 4px;
     white-space: nowrap;
@@ -386,33 +471,33 @@ html.sidebar-collapsed .sidebar-link i {
 
 .kpi-primary .kpi-icon-box { background-color: rgba(0, 77, 93, 0.1); color: var(--color-deep-teal); }
 .kpi-secondary .kpi-icon-box { background-color: rgba(0, 120, 137, 0.12); color: var(--color-vibrant-teal); }
-.kpi-warning .kpi-icon-box { background-color: rgba(246, 159, 58, 0.16); color: #d47a10; }
+.kpi-warning .kpi-icon-box { background-color: rgba(246, 159, 58, 0.18); color: #9a5706; }
 .kpi-danger .kpi-icon-box { background-color: rgba(182, 70, 46, 0.14); color: var(--color-terracotta-red); }
 
 /* ==========================================================================
-   CARDS CORPORATIVOS, TABELAS E BOTÕES
+   CARDS CORPORATIVOS, TABELAS DE FÁCIL LEITURA E BOTÕES DA PALETA XHARA
    ========================================================================== */
 
 .corp-card {
     background-color: var(--color-surface-white);
     border-radius: 10px;
-    border: 1px solid rgba(162, 167, 167, 0.38);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.035);
+    border: 1px solid rgba(162, 167, 167, 0.55);
+    box-shadow: 0 2px 8px rgba(25, 25, 25, 0.04);
     overflow: hidden;
 }
 
 .corp-card-header {
-    padding: 14px 18px;
-    border-bottom: 1px solid rgba(162, 167, 167, 0.3);
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(162, 167, 167, 0.45);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    background-color: #ffffff;
+    background-color: var(--color-surface-white);
 }
 
 .corp-card-title {
-    font-size: 0.96rem;
+    font-size: 0.98rem;
     font-weight: 700;
     color: var(--color-deep-teal);
     margin: 0;
@@ -421,25 +506,34 @@ html.sidebar-collapsed .sidebar-link i {
     text-overflow: ellipsis;
 }
 
+.table-corp {
+    color: var(--color-dark-charcoal);
+}
+
 .table-corp th {
-    background-color: #f4f5f5;
+    background-color: rgba(232, 231, 229, 0.65);
     color: var(--color-deep-teal);
     font-size: 0.76rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
-    border-bottom: 2px solid rgba(162, 167, 167, 0.45);
+    letter-spacing: 0.45px;
+    border-bottom: 2px solid var(--color-cool-gray);
     white-space: nowrap;
-    padding: 11px 14px;
+    padding: 12px 15px;
 }
 
 .table-corp td {
-    padding: 11px 14px;
+    padding: 12px 15px;
     vertical-align: middle;
+    border-bottom-color: rgba(162, 167, 167, 0.32);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 280px;
+}
+
+.table-corp tbody tr:hover {
+    background-color: rgba(232, 231, 229, 0.42);
 }
 
 .text-nowrap-ellipsis {
@@ -448,48 +542,109 @@ html.sidebar-collapsed .sidebar-link i {
     text-overflow: ellipsis;
 }
 
-.btn-teal {
-    background: linear-gradient(135deg, var(--color-vibrant-teal), var(--color-deep-teal));
-    color: #ffffff !important;
-    border: none;
+/* Botões alinhados à Paleta Xhara */
+.btn-teal,
+.btn-primary {
+    background-color: var(--color-vibrant-teal) !important;
+    color: var(--color-surface-white) !important;
+    border: 1px solid var(--color-vibrant-teal) !important;
     font-weight: 600;
+    transition: all 0.18s ease;
 }
 
-.btn-teal:hover {
-    background: linear-gradient(135deg, var(--color-deep-teal), #003642);
-    color: #ffffff !important;
+.btn-teal:hover,
+.btn-primary:hover {
+    background-color: var(--color-deep-teal) !important;
+    border-color: var(--color-deep-teal) !important;
+    color: var(--color-surface-white) !important;
 }
 
+.btn-outline-primary {
+    color: var(--color-vibrant-teal) !important;
+    border-color: var(--color-vibrant-teal) !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--color-vibrant-teal) !important;
+    color: var(--color-surface-white) !important;
+}
+
+.btn-outline-secondary {
+    color: var(--color-medium-gray) !important;
+    border-color: var(--color-cool-gray) !important;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--color-medium-gray) !important;
+    border-color: var(--color-medium-gray) !important;
+    color: var(--color-surface-white) !important;
+}
+
+.btn-danger {
+    background-color: var(--color-terracotta-red) !important;
+    border-color: var(--color-terracotta-red) !important;
+    color: var(--color-surface-white) !important;
+}
+
+.btn-outline-danger {
+    color: var(--color-terracotta-red) !important;
+    border-color: var(--color-terracotta-red) !important;
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--color-terracotta-red) !important;
+    color: var(--color-surface-white) !important;
+}
+
+/* Badges Pantone Xhara */
 .badge-amber {
-    background-color: rgba(246, 159, 58, 0.18);
-    color: #9e5804;
-    border: 1px solid rgba(246, 159, 58, 0.5);
+    background-color: rgba(246, 159, 58, 0.2);
+    color: #8a4c00;
+    border: 1px solid rgba(246, 159, 58, 0.65);
     font-weight: 600;
 }
 
 .badge-terracotta {
     background-color: rgba(182, 70, 46, 0.14);
     color: var(--color-terracotta-red);
-    border: 1px solid rgba(182, 70, 46, 0.4);
+    border: 1px solid rgba(182, 70, 46, 0.45);
     font-weight: 600;
 }
 
 .badge-teal {
-    background-color: rgba(0, 120, 137, 0.14);
+    background-color: rgba(0, 120, 137, 0.12);
     color: var(--color-deep-teal);
     border: 1px solid rgba(0, 120, 137, 0.35);
     font-weight: 600;
 }
 
+/* Mostruário Oficial de Swatches Pantone Xhara */
+.xhara-swatch-card {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(162, 167, 167, 0.5);
+    background-color: var(--color-surface-white);
+}
+
+.xhara-swatch-color {
+    height: 54px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
 /* ==========================================================================
-   SPLASH SCREEN CORPORATIVA OPCIONAL
+   SPLASH SCREEN CORPORATIVA XHARA
    ========================================================================== */
 
 .corporate-splash-overlay {
     position: fixed;
     inset: 0;
-    background: linear-gradient(135deg, var(--color-deep-teal) 0%, #002b36 60%, var(--color-dark-charcoal) 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--color-deep-teal) 0%, #003542 60%, var(--color-dark-charcoal) 100%);
+    color: var(--color-surface-white);
     z-index: 9999;
     display: flex;
     flex-direction: column;

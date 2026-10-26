@@ -37,18 +37,18 @@ public class ConfiguracaoSistema
 
     [Required]
     [StringLength(200)]
-    public string RazaoSocialEmpresa { get; set; } = "Holding Corporativa Brasil S.A.";
+    public string RazaoSocialEmpresa { get; set; } = "Xhara Tecnologia & Governança Corporativa S.A.";
 
     [Required]
     [StringLength(150)]
-    public string NomeFantasiaEmpresa { get; set; } = "CorpGovernance CLM";
+    public string NomeFantasiaEmpresa { get; set; } = "Xhara";
 
     [Required]
     [StringLength(20)]
     public string CnpjEmpresa { get; set; } = "12.345.678/0001-95";
 
     [StringLength(300)]
-    public string? LogoEmpresaPath { get; set; }
+    public string? LogoEmpresaPath { get; set; } = "/images/xhara-logo.svg";
 
     public bool SplashAtivo { get; set; } = true;
 
@@ -56,7 +56,7 @@ public class ConfiguracaoSistema
     public int SplashTempoSegundos { get; set; } = 2;
 
     [StringLength(150)]
-    public string SplashTitulo { get; set; } = "Governança & Ciclo de Vida de Contratos";
+    public string SplashTitulo { get; set; } = "Xhara — Governança & Ciclo de Vida de Contratos";
 
     [StringLength(250)]
     public string SplashSlogan { get; set; } = "Excelência em Compliance Contratual, Prevenção de Riscos e Auditoria Financeira";

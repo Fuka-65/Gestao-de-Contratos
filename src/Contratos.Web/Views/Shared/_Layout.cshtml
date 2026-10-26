@@ -79,13 +79,13 @@
     <div class="app-wrapper">
         <!-- Menu Lateral Retrátil (Collapsible Sidebar) -->
         <aside class="app-sidebar" id="appSidebar">
-            <a href="@Url.Action("Index", "Home")" class="sidebar-brand" title="@config.NomeFantasiaEmpresa">
+            <a href="@Url.Action("Index", "Home")" class="sidebar-brand" title="@config.NomeFantasiaEmpresa — Governança & CLM">
                 <div class="sidebar-brand-icon">
-                    <i class="bi bi-file-earmark-Lock2-fill bi-file-earmark-check-fill"></i>
+                    <img src="~/images/xhara-mark.svg" alt="Xhara" style="width: 28px; height: 28px;" />
                 </div>
                 <div class="sidebar-brand-text">
                     <span class="sidebar-brand-title">@config.NomeFantasiaEmpresa</span>
-                    <span class="sidebar-brand-subtitle">CLM & Auditoria</span>
+                    <span class="sidebar-brand-subtitle">CLM &amp; Auditoria</span>
                 </div>
             </a>
 
@@ -203,7 +203,7 @@
                                 <div class="fw-bold">@fullName</div>
                                 <div class="small text-white-50 mb-2">@userEmail</div>
                                 <div class="d-flex flex-wrap gap-1 mt-1">
-                                    <span class="badge bg-info text-dark fw-semibold">
+                                    <span class="badge fw-semibold" style="background-color: var(--color-warm-amber); color: var(--color-dark-charcoal);">
                                         <i class="bi bi-shield-lock-fill me-1"></i>@mostPermissiveRole
                                     </span>
                                 </div>

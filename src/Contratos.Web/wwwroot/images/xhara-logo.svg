@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" fill="none">
+  <!-- Xhara Geometric Emblem using official Pantone swatches -->
+  <g transform="translate(4, 6)">
+    <!-- Pantone 3035 C (#004d5d) -->
+    <rect x="0" y="0" width="52" height="52" rx="12" fill="#004d5d"/>
+    <!-- Pantone 3145 C (#007889) -->
+    <path d="M13 13 L26 26 L13 39" stroke="#007889" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Pantone 2011 C (#f69f3a) -->
+    <path d="M39 13 L26 26 L39 39" stroke="#f69f3a" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Pantone 6049 C (#b6462e) center node -->
+    <circle cx="26" cy="26" r="4.5" fill="#b6462e"/>
+  </g>
+  <!-- Typography XHARA -->
+  <text x="68" y="38" font-family="'Inter', 'Segoe UI', sans-serif" font-size="28" font-weight="800" letter-spacing="2.5" fill="#ffffff">XHARA</text>
+  <text x="69" y="52" font-family="'Inter', 'Segoe UI', sans-serif" font-size="9.5" font-weight="600" letter-spacing="2.2" fill="#a2a7a7">GOVERNANCE &amp; CLM</text>
+</svg>
