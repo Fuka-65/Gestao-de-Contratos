@@ -12,7 +12,7 @@
       "Ativo": true,
       "AutenticacaoAd": false,
       "DataCriacao": "2025-10-25T00:00:00-03:00",
-      "UltimoAcesso": "2026-10-28T00:58:52.1107652Z"
+      "UltimoAcesso": "2026-10-28T01:10:58.882313Z"
     },
     {
       "Id": 2,
@@ -1273,10 +1273,10 @@
   ],
   "Configuracao": {
     "Id": 1,
-    "RazaoSocialEmpresa": "Industrias Xhara LTDA",
+    "RazaoSocialEmpresa": "Indústrias Xhara S.A.",
     "NomeFantasiaEmpresa": "Xhara",
     "CnpjEmpresa": "04.712.500/0001-07",
-    "LogoEmpresaPath": "/images/xhara-logo.svg",
+    "LogoEmpresaPath": "/images/xhara-logotipo.png",
     "SplashAtivo": true,
     "SplashTempoSegundos": 2,
     "SplashTitulo": "Xhara — Governança & Ciclo de Vida de Contratos",
@@ -1388,6 +1388,24 @@
     {
       "Id": 11,
       "DataHora": "2026-10-28T00:58:52.2199857Z",
+      "UsuarioLogin": "admin@admin",
+      "Acao": "LOGIN_SUCESSO",
+      "Entidade": "Autenticacao",
+      "Detalhes": "Autenticação realizada com sucesso via LocalAdminMaster. Papel prevalente: Master.",
+      "EnderecoIp": "::1"
+    },
+    {
+      "Id": 12,
+      "DataHora": "2026-10-28T01:10:24.9396554Z",
+      "UsuarioLogin": "admin@admin",
+      "Acao": "LOGOUT",
+      "Entidade": "Autenticacao",
+      "Detalhes": "Sessão encerrada pelo usuário.",
+      "EnderecoIp": "::1"
+    },
+    {
+      "Id": 13,
+      "DataHora": "2026-10-28T01:10:58.9484434Z",
       "UsuarioLogin": "admin@admin",
       "Acao": "LOGIN_SUCESSO",
       "Entidade": "Autenticacao",
