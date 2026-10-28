@@ -12,7 +12,7 @@
       "Ativo": true,
       "AutenticacaoAd": false,
       "DataCriacao": "2025-10-25T00:00:00-03:00",
-      "UltimoAcesso": "2026-10-26T02:24:51.2247917Z"
+      "UltimoAcesso": "2026-10-28T00:58:52.1107652Z"
     },
     {
       "Id": 2,
@@ -108,7 +108,7 @@
       "InscricaoEstadual": "111.090.246.114",
       "InscricaoMunicipal": "9.124.550-1",
       "ContatoComercialNome": "Eduardo Fontes (Executivo de Contas)",
-      "ContatoComercialTelefone": "(11) 2099-7000",
+      "ContatoComercialTelefone": "(11) 2099-7500",
       "ContatoComercialEmail": "eduardo.fontes@totvs.com.br",
       "ContatoFinanceiroNome": "Central Financeira TOTVS",
       "ContatoFinanceiroTelefone": "0800 709 8100",
@@ -1347,6 +1347,51 @@
       "Acao": "LOGIN_SUCESSO",
       "Entidade": "Autenticacao",
       "Detalhes": "Autenticação realizada com sucesso via LocalHash. Papel prevalente: GestorContratos.",
+      "EnderecoIp": "::1"
+    },
+    {
+      "Id": 7,
+      "DataHora": "2026-10-26T03:09:08.0254087Z",
+      "UsuarioLogin": "carlos.mendes",
+      "Acao": "EXPORTAR_FORNECEDORES_CSV",
+      "Entidade": "Fornecedor",
+      "Detalhes": "Exportação de cadastro de fornecedores via CSV (5 registros exportados).",
+      "EnderecoIp": "::1"
+    },
+    {
+      "Id": 8,
+      "DataHora": "2026-10-26T03:09:50.1032931Z",
+      "UsuarioLogin": "carlos.mendes",
+      "Acao": "EXPORTAR_FORNECEDORES_CSV",
+      "Entidade": "Fornecedor",
+      "Detalhes": "Exportação de cadastro de fornecedores via CSV (5 registros exportados).",
+      "EnderecoIp": "::1"
+    },
+    {
+      "Id": 9,
+      "DataHora": "2026-10-26T03:10:52.6337826Z",
+      "UsuarioLogin": "carlos.mendes",
+      "Acao": "IMPORTAR_LOTE_FORNECEDORES_CSV",
+      "Entidade": "Fornecedor",
+      "Detalhes": "Arquivo 'Fornecedores_Xhara_20261026.csv' processado: 5 linhas (0 novos, 3 idênticos mantidos, 1 divergências aguardando confirmação, 1 erros).",
+      "EnderecoIp": "::1"
+    },
+    {
+      "Id": 10,
+      "DataHora": "2026-10-26T03:11:07.2438072Z",
+      "UsuarioLogin": "carlos.mendes",
+      "Acao": "RESOLVER_DIVERGENCIAS_CSV_FORNECEDORES",
+      "Entidade": "Fornecedor",
+      "Detalhes": "Resolução de divergências do arquivo 'Fornecedores_Xhara_20261026.csv': 1 registro(s) atualizado(s) e 0 registro(s) original(is) mantido(s).",
+      "EnderecoIp": "::1"
+    },
+    {
+      "Id": 11,
+      "DataHora": "2026-10-28T00:58:52.2199857Z",
+      "UsuarioLogin": "admin@admin",
+      "Acao": "LOGIN_SUCESSO",
+      "Entidade": "Autenticacao",
+      "Detalhes": "Autenticação realizada com sucesso via LocalAdminMaster. Papel prevalente: Master.",
       "EnderecoIp": "::1"
     }
   ]

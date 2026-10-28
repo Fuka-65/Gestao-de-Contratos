@@ -163,7 +163,7 @@ html.sidebar-collapsed .app-main {
     height: var(--topbar-height);
     display: flex;
     align-items: center;
-    padding: 0 16px;
+    padding: 0 18px;
     border-bottom: 1px solid rgba(162, 167, 167, 0.2);
     text-decoration: none;
     color: var(--color-surface-white) !important;
@@ -171,40 +171,36 @@ html.sidebar-collapsed .app-main {
     overflow: hidden;
 }
 
-.sidebar-brand-icon {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    border-radius: 9px;
-    background-color: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.sidebar-brand-text {
-    margin-left: 12px;
+.sidebar-brand-expanded-box {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    gap: 2px;
     overflow: hidden;
 }
 
-.sidebar-brand-title {
-    font-weight: 800;
-    font-size: 1.08rem;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    line-height: 1.15;
-    color: var(--color-surface-white);
+.sidebar-logo-full {
+    height: 25px;
+    width: auto;
+    max-width: 175px;
+    object-fit: contain;
+    object-position: left center;
+    display: block;
+}
+
+.sidebar-logo-collapsed {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    display: none;
 }
 
 .sidebar-brand-subtitle {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     color: var(--color-cool-gray);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.4px;
     font-weight: 600;
 }
 
@@ -276,6 +272,11 @@ html.sidebar-collapsed .sidebar-brand {
     padding: 0;
 }
 
+html.sidebar-collapsed .sidebar-logo-collapsed {
+    display: block !important;
+}
+
+html.sidebar-collapsed .sidebar-brand-expanded-box,
 html.sidebar-collapsed .sidebar-brand-text,
 html.sidebar-collapsed .sidebar-section-label,
 html.sidebar-collapsed .sidebar-link span,

@@ -37,7 +37,7 @@ public class ConfiguracaoSistema
 
     [Required]
     [StringLength(200)]
-    public string RazaoSocialEmpresa { get; set; } = "Xhara Tecnologia & Governança Corporativa S.A.";
+    public string RazaoSocialEmpresa { get; set; } = "Indústrias Xhara S.A.";
 
     [Required]
     [StringLength(150)]
@@ -48,7 +48,7 @@ public class ConfiguracaoSistema
     public string CnpjEmpresa { get; set; } = "12.345.678/0001-95";
 
     [StringLength(300)]
-    public string? LogoEmpresaPath { get; set; } = "/images/xhara-logo.svg";
+    public string? LogoEmpresaPath { get; set; } = "/images/xhara-logotipo.png";
 
     public bool SplashAtivo { get; set; } = true;
 

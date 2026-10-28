@@ -52,12 +52,14 @@ public class JsonClmRepository : IClmRepository
                 EnsureAdminMasterExists(snapshot);
                 if (snapshot.Configuracao.NomeFantasiaEmpresa == "Vanguard Governance CLM" ||
                     snapshot.Configuracao.NomeFantasiaEmpresa == "CorpGovernance CLM" ||
-                    string.IsNullOrWhiteSpace(snapshot.Configuracao.NomeFantasiaEmpresa))
+                    string.IsNullOrWhiteSpace(snapshot.Configuracao.NomeFantasiaEmpresa) ||
+                    snapshot.Configuracao.LogoEmpresaPath == null ||
+                    snapshot.Configuracao.LogoEmpresaPath == "/images/xhara-logo.svg")
                 {
                     snapshot.Configuracao.NomeFantasiaEmpresa = "Xhara";
-                    snapshot.Configuracao.RazaoSocialEmpresa = "Xhara Tecnologia & Governança Corporativa S.A.";
+                    snapshot.Configuracao.RazaoSocialEmpresa = "Indústrias Xhara S.A.";
                     snapshot.Configuracao.SplashTitulo = "Xhara — Governança & Ciclo de Vida de Contratos";
-                    snapshot.Configuracao.LogoEmpresaPath = "/images/xhara-logo.svg";
+                    snapshot.Configuracao.LogoEmpresaPath = "/images/xhara-logotipo.png";
                     snapshot.Configuracao.LdapDominio = "corp.xhara.com.br";
                     snapshot.Configuracao.LdapServidor = "ldap://dc01.corp.xhara.com.br";
                     snapshot.Configuracao.LdapBaseDn = "DC=corp,DC=xhara,DC=com,DC=br";

@@ -21,6 +21,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - @config.NomeFantasiaEmpresa</title>
+    <link rel="icon" type="image/png" href="~/favicon.png" />
 
     <!-- Script de Inicialização Rápida no <head> para eliminar qualquer flicker da Sidebar -->
     <script>
@@ -79,13 +80,13 @@
     <div class="app-wrapper">
         <!-- Menu Lateral Retrátil (Collapsible Sidebar) -->
         <aside class="app-sidebar" id="appSidebar">
-            <a href="@Url.Action("Index", "Home")" class="sidebar-brand" title="@config.NomeFantasiaEmpresa — Governança & CLM">
-                <div class="sidebar-brand-icon">
-                    <img src="~/images/xhara-mark.svg" alt="Xhara" style="width: 28px; height: 28px;" />
-                </div>
-                <div class="sidebar-brand-text">
-                    <span class="sidebar-brand-title">@config.NomeFantasiaEmpresa</span>
-                    <span class="sidebar-brand-subtitle">CLM &amp; Auditoria</span>
+            <a href="@Url.Action("Index", "Home")" class="sidebar-brand" title="@config.RazaoSocialEmpresa — Governança & CLM">
+                <img src="~/images/xhara-icone.png" alt="Xhara" class="sidebar-logo-collapsed" />
+                <div class="sidebar-brand-expanded-box">
+                    <img src="@(string.IsNullOrWhiteSpace(config.LogoEmpresaPath) ? "/images/xhara-logotipo.png" : config.LogoEmpresaPath)"
+                         alt="Indústrias Xhara"
+                         class="sidebar-logo-full" />
+                    <span class="sidebar-brand-subtitle">Governança &amp; CLM</span>
                 </div>
             </a>
 

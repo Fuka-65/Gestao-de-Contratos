@@ -29,10 +29,10 @@ public static class SeedDataGenerator
         snapshot.Configuracao = new ConfiguracaoSistema
         {
             Id = 1,
-            RazaoSocialEmpresa = "Xhara Tecnologia & Governança Corporativa S.A.",
+            RazaoSocialEmpresa = "Indústrias Xhara S.A.",
             NomeFantasiaEmpresa = "Xhara",
             CnpjEmpresa = "04.712.500/0001-07",
-            LogoEmpresaPath = "/images/xhara-logo.svg",
+            LogoEmpresaPath = "/images/xhara-logotipo.png",
             SplashAtivo = true,
             SplashTempoSegundos = 2,
             SplashTitulo = "Xhara — Governança & Ciclo de Vida de Contratos",
